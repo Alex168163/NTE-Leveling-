@@ -1,0 +1,213 @@
+// ---------------------------------------------------------------------------
+// parse-md.mjs — Source-of-truth pipeline.
+//
+// NTE_Leveling.md is the single source of truth for every cost in this app.
+// This script parses its markdown tables into src/data/gameData.json, which
+// the React app imports. Editing the markdown and re-running `npm run gen:data`
+// (or any dev/build, which runs it automatically) propagates changes to the UI.
+// ---------------------------------------------------------------------------
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ROOT = join(__dirname, '..')
+const MD_PATH = join(ROOT, 'NTE_Leveling.md')
+const OUT_PATH = join(ROOT, 'src', 'data', 'gameData.json')
+const ICONS_PATH = join(ROOT, 'src', 'data', 'icons.json')
+const ASSETS_DIR = join(ROOT, 'public', 'assets')
+
+const md = readFileSync(MD_PATH, 'utf8')
+
+// --- number parsing -------------------------------------------------------
+// "103k" -> 103000, "1.6m" -> 1600000, "26,000" -> 26000, "—"/"-" -> 0
+function num(raw) {
+  if (raw == null) return 0
+  const s = String(raw).trim().toLowerCase().replace(/,/g, '')
+  if (s === '' || s === '—' || s === '-' || s === '–') return 0
+  const m = s.match(/([\d.]+)\s*([km])?/)
+  if (!m) return 0
+  let v = parseFloat(m[1])
+  if (m[2] === 'k') v *= 1_000
+  else if (m[2] === 'm') v *= 1_000_000
+  return Math.round(v)
+}
+
+// "5x Green" -> { qty:5, color:"Green" }; "2x" -> { qty:2, color:null };
+// "—" -> { qty:0, color:null }
+function mat(raw) {
+  const s = String(raw ?? '').trim()
+  if (s === '' || s === '—' || s === '-' || s === '–') return { qty: 0, color: null }
+  const m = s.match(/([\d.,]+)\s*x?\s*(green|blue|purple|gold|silver|bronze)?/i)
+  if (!m) return { qty: 0, color: null }
+  const qty = num(m[1])
+  const color = m[2] ? m[2][0].toUpperCase() + m[2].slice(1).toLowerCase() : null
+  return { qty, color }
+}
+
+// --- table extraction -----------------------------------------------------
+// Find the first markdown table that appears after a heading whose text
+// contains `headingNeedle`. Returns array of row objects keyed by header cells.
+function tableAfter(headingNeedle) {
+  const lines = md.split(/\r?\n/)
+  let i = lines.findIndex(
+    (l) => /^#{1,6}\s/.test(l) && l.toLowerCase().includes(headingNeedle.toLowerCase()),
+  )
+  if (i === -1) throw new Error(`Heading not found: ${headingNeedle}`)
+
+  // advance to the header row of the next table
+  while (i < lines.length && !lines[i].trim().startsWith('|')) i++
+  if (i >= lines.length) throw new Error(`No table after heading: ${headingNeedle}`)
+
+  const cells = (l) =>
+    l
+      .trim()
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .split('|')
+      .map((c) => c.trim())
+
+  const headers = cells(lines[i])
+  i += 2 // skip header + separator row
+  const rows = []
+  for (; i < lines.length && lines[i].trim().startsWith('|'); i++) {
+    const vals = cells(lines[i])
+    const row = {}
+    headers.forEach((h, idx) => (row[h] = vals[idx] ?? ''))
+    rows.push(row)
+  }
+  return rows
+}
+
+// Parse a "Level Range" string like "70–80" / "1-20" -> { from, to }
+function range(s) {
+  const m = String(s).match(/(\d+)\s*[–-]\s*(\d+)/)
+  return m ? { from: +m[1], to: +m[2] } : { from: 0, to: 0 }
+}
+function ascRange(s) {
+  const m = String(s).match(/(\d+)\s*[→>-]+\s*(\d+)/)
+  return m ? { from: +m[1], to: +m[2] } : { from: 0, to: 0 }
+}
+
+// --- build the data object ------------------------------------------------
+const data = {}
+
+// Ascension caps
+data.ascensionCaps = tableAfter('Ascension Level Caps').map((r) => ({
+  ascension: num(r['Ascension'].replace(/ascend/i, '')),
+  unlocksTo: num(r['Unlocks Leveling To']),
+}))
+
+// Characters
+data.characters = {
+  leveling: tableAfter('Characters')
+    .filter((r) => r['Level Range'])
+    .map((r) => ({ ...range(r['Level Range']), xp: num(r['XP']), coins: num(r['Coins']) })),
+  ascension: tableAfter('Character Ascension Upgrade Costs').map((r) => ({
+    ...ascRange(r['Ascension']),
+    coins: num(r['Beetle Coins']),
+    anomalyHunt: mat(r['Anomaly Hunt Material']).qty,
+    worldDrop: mat(r['World Drop Material']),
+  })),
+}
+
+// Arcs
+data.arcs = {
+  leveling: tableAfter('Arcs')
+    .filter((r) => r['Level Range'])
+    .map((r) => ({
+      ...range(r['Level Range']),
+      xp: num(r['XP']),
+      coins: num(r['Coins']),
+      ascendCoins: num(r['Ascend Coins']),
+    })),
+  ascension: tableAfter('Arc Ascension Upgrade Costs').map((r) => ({
+    ...ascRange(r['Ascension']),
+    coins: num(r['Beetle Coins']),
+    arcMat: mat(r['Arc Material']),
+    worldDrop: mat(r['World Drop Material']),
+  })),
+}
+
+// Cartridges & Modules
+const cm = (needle) =>
+  tableAfter(needle).map((r) => ({
+    rarity: r['Rarity'],
+    maxLevel: num(r['Max Level']),
+    xp: num(r['XP']),
+    coins: num(r['Coins']),
+  }))
+data.cartridges = cm('Cost to Upgrade Cartridges')
+data.modules = cm('Cost to Upgrade Modules')
+
+// Abilities (fun-fact / progression checker)
+const abilityRows = (needle) =>
+  tableAfter(needle).map((r) => ({
+    material: r['Material'].replace(/^\*example:\*\s*/i, '').trim(),
+    isExample: /\*example:\*/i.test(r['Material']),
+    amount: num(r['Amount']),
+  }))
+data.abilities = {
+  perSkill: abilityRows('Base Attack'),
+  passive1: abilityRows('Passive Skill 1'),
+  passive2: abilityRows('Passive Skill 2'),
+}
+
+// Life skills
+data.lifeSkills = tableAfter('All Life Skills on One Character').map((r) => ({
+  material: r['Material'],
+  amount: num(r['Amount']),
+}))
+
+// XP sources
+const xpRows = (needle, xpKey) =>
+  tableAfter(needle).map((r) => {
+    const sourceKey = Object.keys(r).find((k) => /source/i.test(k))
+    const valKey = Object.keys(r).find((k) => /xp/i.test(k))
+    const src = r[sourceKey]
+    const colorM = src.match(/green|blue|purple/i)
+    return {
+      source: src,
+      color: colorM ? colorM[0][0].toUpperCase() + colorM[0].slice(1).toLowerCase() : null,
+      xp: num(r[valKey]),
+    }
+  })
+data.xpSources = {
+  character: xpRows('Character XP'),
+  arc: xpRows('Arc XP'),
+  cartridgeModule: xpRows('Cartridges / Modules XP'),
+}
+
+writeFileSync(OUT_PATH, JSON.stringify(data, null, 2) + '\n')
+
+// --- icon manifest --------------------------------------------------------
+// The spec requires that for any icon used, "all others sharing the same name
+// and color" are listed too. We group every PNG by its base name (stripping a
+// trailing "Example N" / number) so a material maps to ALL its matching icons.
+// "Materal" (a source typo) is normalised to "Material".
+function baseName(file) {
+  return file
+    .replace(/\.png$/i, '')
+    .replace(/\s*Example\s*\d*$/i, '') // "... Example 3" / "... Example"
+    .replace(/\s+\d+$/i, '') // trailing bare number
+    .replace(/Materal/gi, 'Material')
+    .trim()
+}
+
+const groups = {}
+for (const file of readdirSync(ASSETS_DIR)) {
+  if (!/\.png$/i.test(file)) continue // skip Background.jpg etc.
+  const key = baseName(file)
+  ;(groups[key] ||= []).push(`assets/${file}`)
+}
+// stable order within each group
+for (const k of Object.keys(groups)) groups[k].sort()
+
+writeFileSync(ICONS_PATH, JSON.stringify(groups, null, 2) + '\n')
+
+console.log(`✓ Parsed NTE_Leveling.md -> ${OUT_PATH}`)
+console.log(`✓ Built icon manifest (${Object.keys(groups).length} groups) -> ${ICONS_PATH}`)
+console.log(
+  `  ${data.characters.leveling.length} char levels, ${data.arcs.leveling.length} arc levels, ` +
+    `${data.cartridges.length} cartridge rarities, ${data.xpSources.character.length} char XP sources`,
+)

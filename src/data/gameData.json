@@ -1,0 +1,438 @@
+{
+  "ascensionCaps": [
+    {
+      "ascension": 1,
+      "unlocksTo": 30
+    },
+    {
+      "ascension": 2,
+      "unlocksTo": 40
+    },
+    {
+      "ascension": 3,
+      "unlocksTo": 50
+    },
+    {
+      "ascension": 4,
+      "unlocksTo": 60
+    },
+    {
+      "ascension": 5,
+      "unlocksTo": 70
+    },
+    {
+      "ascension": 6,
+      "unlocksTo": 80
+    }
+  ],
+  "characters": {
+    "leveling": [
+      {
+        "from": 1,
+        "to": 20,
+        "xp": 103000,
+        "coins": 26000
+      },
+      {
+        "from": 20,
+        "to": 30,
+        "xp": 213000,
+        "coins": 54000
+      },
+      {
+        "from": 30,
+        "to": 40,
+        "xp": 375000,
+        "coins": 93000
+      },
+      {
+        "from": 40,
+        "to": 50,
+        "xp": 620000,
+        "coins": 152000
+      },
+      {
+        "from": 50,
+        "to": 60,
+        "xp": 980000,
+        "coins": 245000
+      },
+      {
+        "from": 60,
+        "to": 70,
+        "xp": 1600000,
+        "coins": 400000
+      },
+      {
+        "from": 70,
+        "to": 80,
+        "xp": 2620000,
+        "coins": 955000
+      }
+    ],
+    "ascension": [
+      {
+        "from": 20,
+        "to": 30,
+        "coins": 25000,
+        "anomalyHunt": 0,
+        "worldDrop": {
+          "qty": 5,
+          "color": "Green"
+        }
+      },
+      {
+        "from": 30,
+        "to": 40,
+        "coins": 50000,
+        "anomalyHunt": 2,
+        "worldDrop": {
+          "qty": 12,
+          "color": "Green"
+        }
+      },
+      {
+        "from": 40,
+        "to": 50,
+        "coins": 75000,
+        "anomalyHunt": 8,
+        "worldDrop": {
+          "qty": 6,
+          "color": "Blue"
+        }
+      },
+      {
+        "from": 50,
+        "to": 60,
+        "coins": 100000,
+        "anomalyHunt": 16,
+        "worldDrop": {
+          "qty": 12,
+          "color": "Blue"
+        }
+      },
+      {
+        "from": 60,
+        "to": 70,
+        "coins": 125000,
+        "anomalyHunt": 24,
+        "worldDrop": {
+          "qty": 6,
+          "color": "Purple"
+        }
+      },
+      {
+        "from": 70,
+        "to": 80,
+        "coins": 150000,
+        "anomalyHunt": 36,
+        "worldDrop": {
+          "qty": 9,
+          "color": "Purple"
+        }
+      }
+    ]
+  },
+  "arcs": {
+    "leveling": [
+      {
+        "from": 1,
+        "to": 20,
+        "xp": 40000,
+        "coins": 12000,
+        "ascendCoins": 0
+      },
+      {
+        "from": 20,
+        "to": 30,
+        "xp": 100000,
+        "coins": 30000,
+        "ascendCoins": 1
+      },
+      {
+        "from": 30,
+        "to": 40,
+        "xp": 200000,
+        "coins": 60000,
+        "ascendCoins": 2
+      },
+      {
+        "from": 40,
+        "to": 50,
+        "xp": 350000,
+        "coins": 102000,
+        "ascendCoins": 3
+      },
+      {
+        "from": 50,
+        "to": 60,
+        "xp": 560000,
+        "coins": 171000,
+        "ascendCoins": 4
+      },
+      {
+        "from": 60,
+        "to": 70,
+        "xp": 910000,
+        "coins": 273000,
+        "ascendCoins": 5
+      },
+      {
+        "from": 70,
+        "to": 80,
+        "xp": 1490000,
+        "coins": 447000,
+        "ascendCoins": 6
+      }
+    ],
+    "ascension": [
+      {
+        "from": 20,
+        "to": 30,
+        "coins": 20000,
+        "arcMat": {
+          "qty": 4,
+          "color": "Green"
+        },
+        "worldDrop": {
+          "qty": 4,
+          "color": "Green"
+        }
+      },
+      {
+        "from": 30,
+        "to": 40,
+        "coins": 40000,
+        "arcMat": {
+          "qty": 10,
+          "color": "Green"
+        },
+        "worldDrop": {
+          "qty": 10,
+          "color": "Green"
+        }
+      },
+      {
+        "from": 40,
+        "to": 50,
+        "coins": 60000,
+        "arcMat": {
+          "qty": 6,
+          "color": "Blue"
+        },
+        "worldDrop": {
+          "qty": 6,
+          "color": "Blue"
+        }
+      },
+      {
+        "from": 50,
+        "to": 60,
+        "coins": 80000,
+        "arcMat": {
+          "qty": 12,
+          "color": "Blue"
+        },
+        "worldDrop": {
+          "qty": 12,
+          "color": "Blue"
+        }
+      },
+      {
+        "from": 60,
+        "to": 70,
+        "coins": 100000,
+        "arcMat": {
+          "qty": 6,
+          "color": "Purple"
+        },
+        "worldDrop": {
+          "qty": 6,
+          "color": "Purple"
+        }
+      },
+      {
+        "from": 70,
+        "to": 80,
+        "coins": 120000,
+        "arcMat": {
+          "qty": 12,
+          "color": "Purple"
+        },
+        "worldDrop": {
+          "qty": 12,
+          "color": "Purple"
+        }
+      }
+    ]
+  },
+  "cartridges": [
+    {
+      "rarity": "Gold",
+      "maxLevel": 20,
+      "xp": 693000,
+      "coins": 14000
+    },
+    {
+      "rarity": "Purple",
+      "maxLevel": 20,
+      "xp": 463000,
+      "coins": 10000
+    }
+  ],
+  "modules": [
+    {
+      "rarity": "Gold",
+      "maxLevel": 20,
+      "xp": 418000,
+      "coins": 9000
+    },
+    {
+      "rarity": "Purple",
+      "maxLevel": 20,
+      "xp": 188000,
+      "coins": 4000
+    }
+  ],
+  "abilities": {
+    "perSkill": [
+      {
+        "material": "Anomaly Pilgrimage Material",
+        "isExample": false,
+        "amount": 8
+      },
+      {
+        "material": "Purple World Drop Material",
+        "isExample": false,
+        "amount": 16
+      },
+      {
+        "material": "Gold Ability Upgrade Material",
+        "isExample": false,
+        "amount": 16
+      },
+      {
+        "material": "Blue World Drop Material",
+        "isExample": false,
+        "amount": 10
+      },
+      {
+        "material": "Silver Ability Upgrade Material",
+        "isExample": false,
+        "amount": 10
+      },
+      {
+        "material": "Green World Drop Material",
+        "isExample": false,
+        "amount": 10
+      },
+      {
+        "material": "Bronze Ability Upgrade Material",
+        "isExample": false,
+        "amount": 10
+      },
+      {
+        "material": "Beetle Coin",
+        "isExample": false,
+        "amount": 437000
+      }
+    ],
+    "passive1": [
+      {
+        "material": "Eternal Memory",
+        "isExample": true,
+        "amount": 1
+      },
+      {
+        "material": "Resonance of Faith",
+        "isExample": true,
+        "amount": 2
+      },
+      {
+        "material": "Beetle Coin",
+        "isExample": false,
+        "amount": 30000
+      }
+    ],
+    "passive2": [
+      {
+        "material": "Eternal Memory",
+        "isExample": true,
+        "amount": 2
+      },
+      {
+        "material": "Heart-Racing Night",
+        "isExample": true,
+        "amount": 1
+      },
+      {
+        "material": "Beetle Coin",
+        "isExample": false,
+        "amount": 40000
+      }
+    ]
+  },
+  "lifeSkills": [
+    {
+      "material": "Dreamless Seed",
+      "amount": 56
+    },
+    {
+      "material": "Fons",
+      "amount": 22000
+    }
+  ],
+  "xpSources": {
+    "character": [
+      {
+        "source": "Green / Rising Hunter Guide",
+        "color": "Green",
+        "xp": 1000
+      },
+      {
+        "source": "Blue / Senior Hunter Guide",
+        "color": "Blue",
+        "xp": 5000
+      },
+      {
+        "source": "Purple / Elite Hunter Guide",
+        "color": "Purple",
+        "xp": 20000
+      }
+    ],
+    "arc": [
+      {
+        "source": "Green / Light Dye",
+        "color": "Green",
+        "xp": 500
+      },
+      {
+        "source": "Blue / Colorless Dye",
+        "color": "Blue",
+        "xp": 2500
+      },
+      {
+        "source": "Purple / Chaotic Dye",
+        "color": "Purple",
+        "xp": 10000
+      }
+    ],
+    "cartridgeModule": [
+      {
+        "source": "Green / Thug Manhole",
+        "color": "Green",
+        "xp": 1000
+      },
+      {
+        "source": "Blue / Crook Manhole",
+        "color": "Blue",
+        "xp": 5000
+      },
+      {
+        "source": "Purple / Boss Manhole",
+        "color": "Purple",
+        "xp": 20000
+      }
+    ]
+  }
+}

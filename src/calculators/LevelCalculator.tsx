@@ -1,0 +1,192 @@
+// Shared calculator for the two categories that have leveling + ascensions
+// (Characters and Arcs). Driven entirely by a config built from the parsed
+// markdown data.
+import { useMemo, useState } from 'react'
+import type { Step, XpSource } from '../types'
+import { cumulativeCost, maxReach, xpFromSources, type Budget } from '../lib/calc'
+import { parseInput, short } from '../lib/format'
+import { ResourceInput } from '../components/ResourceInput'
+import { CostRow } from '../components/CostRow'
+import { IconStack } from '../components/IconStack'
+
+export interface MatInput {
+  id: string
+  label: string
+  iconName: string
+}
+export interface LevelConfig {
+  steps: Step[]
+  xpSources: XpSource[]
+  xpLabel: string
+  matInputs: MatInput[]
+}
+
+const COLORS = ['Green', 'Blue', 'Purple'] as const
+
+export function LevelCalculator({ config }: { config: LevelConfig }) {
+  const levels = config.steps.map((s) => s.to) // e.g. [20,30,...,80]
+  const [target, setTarget] = useState(levels[levels.length - 1])
+  const [xpCounts, setXpCounts] = useState<Record<string, string>>({})
+  const [coins, setCoins] = useState('')
+  const [matCounts, setMatCounts] = useState<Record<string, string>>({})
+
+  const budget: Budget = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const c of COLORS) counts[c] = parseInput(xpCounts[c] ?? '')
+    const mats: Record<string, number> = {}
+    for (const m of config.matInputs) mats[m.id] = parseInput(matCounts[m.id] ?? '')
+    return { xp: xpFromSources(config.xpSources, counts), coins: parseInput(coins), mats }
+  }, [xpCounts, coins, matCounts, config])
+
+  const totals = useMemo(() => cumulativeCost(config.steps, target), [config.steps, target])
+  const reach = useMemo(() => maxReach(config.steps, budget), [config.steps, budget])
+
+  // Map color -> the XP source row (for icon + per-unit value).
+  const sourceByColor = (c: string) => config.xpSources.find((s) => s.color === c)
+
+  return (
+    <div className="calc">
+      {/* ---- Owned resources ---- */}
+      <section className="panel inputs">
+        <h3>Your resources</h3>
+        <div className="input-grid">
+          <div className="input-col">
+            <div className="col-head">{config.xpLabel} sources</div>
+            {COLORS.map((c) => {
+              const src = sourceByColor(c)
+              if (!src) return null
+              return (
+                <ResourceInput
+                  key={c}
+                  label={src.source}
+                  iconName={src.source}
+                  value={xpCounts[c] ?? ''}
+                  onChange={(v) => setXpCounts((p) => ({ ...p, [c]: v }))}
+                />
+              )
+            })}
+            <div className="xp-total">
+              = {short(budget.xp)} {config.xpLabel}
+            </div>
+          </div>
+
+          <div className="input-col">
+            <div className="col-head">Materials &amp; coins</div>
+            <ResourceInput
+              label="Beetle Coins"
+              iconName="Beetle Coins"
+              value={coins}
+              onChange={setCoins}
+              wide
+            />
+            {config.matInputs.map((m) => (
+              <ResourceInput
+                key={m.id}
+                label={m.label}
+                iconName={m.iconName}
+                value={matCounts[m.id] ?? ''}
+                onChange={(v) => setMatCounts((p) => ({ ...p, [m.id]: v }))}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Max reach readout ---- */}
+      <section className="panel reach">
+        <h3>How high can you go?</h3>
+        <div className="reach-level">
+          Level <strong>{reach.level}</strong>
+        </div>
+        {reach.nextLevel ? (
+          <p className="reach-note">
+            To reach <strong>Lv {reach.nextLevel}</strong> you still need:{' '}
+            {reach.blockedBy.join(', ')}.
+          </p>
+        ) : (
+          <p className="reach-note good">Maxed — your resources cover all the way to Lv 80. 🎉</p>
+        )}
+      </section>
+
+      {/* ---- Target slider + cost ---- */}
+      <section className="panel target">
+        <div className="target-head">
+          <h3>Cost to reach</h3>
+          <div className="target-badge">Lv {target}</div>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={levels.length - 1}
+          step={1}
+          value={levels.indexOf(target)}
+          onChange={(e) => setTarget(levels[+e.target.value])}
+          className="slider"
+        />
+        <div className="slider-ticks">
+          {levels.map((l) => (
+            <button
+              key={l}
+              className={l === target ? 'tick active' : 'tick'}
+              onClick={() => setTarget(l)}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+
+        <div className="cost-list">
+          <CostRow label={config.xpLabel} amount={totals.xp} iconName={config.xpSources[0].source} have={budget.xp} />
+          <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={budget.coins} />
+          {Object.values(totals.mats).map((r) => (
+            <CostRow
+              key={r.id}
+              label={r.label}
+              amount={r.qty}
+              iconName={r.iconName}
+              have={budget.mats[r.id] ?? 0}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ---- Per-step breakdown ---- */}
+      <section className="panel breakdown">
+        <h3>Per-ascension breakdown</h3>
+        <table className="break-table">
+          <thead>
+            <tr>
+              <th>Reach</th>
+              <th>{config.xpLabel}</th>
+              <th>Coins</th>
+              <th>Ascension materials</th>
+            </tr>
+          </thead>
+          <tbody>
+            {config.steps.map((s) => (
+              <tr key={s.to} className={s.to <= target ? 'in-range' : ''}>
+                <td>Lv {s.to}</td>
+                <td title={String(s.levelXP)}>{short(s.levelXP)}</td>
+                <td>{short(s.coins)}</td>
+                <td>
+                  {s.reqs.length === 0 ? (
+                    <span className="muted">—</span>
+                  ) : (
+                    <span className="mat-cells">
+                      {s.reqs.map((r) => (
+                        <span key={r.id} className="mat-cell">
+                          <IconStack name={r.iconName} size={20} />
+                          {r.qty}× {r.label}
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  )
+}
