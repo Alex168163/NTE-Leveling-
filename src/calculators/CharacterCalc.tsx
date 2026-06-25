@@ -5,6 +5,8 @@ export function CharacterCalc() {
   return (
     <LevelCalculator
       config={{
+        id: 'char',
+        xpKeyPrefix: 'guide',
         steps: characterSteps(),
         xpSources: gameData.xpSources.character,
         xpLabel: 'Character XP',

@@ -5,6 +5,8 @@ export function ArcCalc() {
   return (
     <LevelCalculator
       config={{
+        id: 'arc',
+        xpKeyPrefix: 'dye',
         steps: arcSteps(),
         xpSources: gameData.xpSources.arc,
         xpLabel: 'Arc XP',

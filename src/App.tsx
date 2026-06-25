@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useResources } from './state/resources'
 import { CharacterCalc } from './calculators/CharacterCalc'
 import { ArcCalc } from './calculators/ArcCalc'
 import { CartridgeModuleCalc } from './calculators/CartridgeModuleCalc'
@@ -23,6 +24,7 @@ const TABS: Tab[] = [
 export default function App() {
   const [active, setActive] = useState(TABS[0].id)
   const tab = TABS.find((t) => t.id === active)!
+  const { reset } = useResources()
 
   return (
     <div className="app">
@@ -31,7 +33,18 @@ export default function App() {
           <span className="logo-n">NTE</span>
           <span className="logo-sub">Leveling Calculator &amp; Resource Checker</span>
         </div>
-        <div className="logo-tag">Neverness&nbsp;To&nbsp;Everness · QOL tool</div>
+        <div className="header-right">
+          <div className="logo-tag">Neverness&nbsp;To&nbsp;Everness · QOL tool</div>
+          <button
+            className="reset-btn"
+            onClick={() => {
+              if (confirm('Clear every value you have entered across all tabs?')) reset()
+            }}
+            title="Clear all saved inputs"
+          >
+            Reset inputs
+          </button>
+        </div>
       </header>
 
       <div className="disclaimer">

@@ -1,12 +1,13 @@
 // Cartridges & Modules have no ascension — each item just maxes to Lv 20 by
 // rarity. This tab lets you plan how many of each item type to max and checks
 // it against your Manhole XP + Beetle Coins.
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { gameData, xpFromSources } from '../lib/calc'
-import { parseInput, sanitizeResource, short } from '../lib/format'
+import { parseInput, sanitizeResource, short, cleanName } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
+import { useResources } from '../state/resources'
 
 interface Item {
   key: string
@@ -24,29 +25,29 @@ export function CartridgeModuleCalc() {
     ...gameData.modules.map((m) => ({ key: `mod:${m.rarity}`, type: 'Module', rarity: m.rarity, xp: m.xp, coins: m.coins })),
   ]
 
-  const [xpCounts, setXpCounts] = useState<Record<string, string>>({})
-  const [coins, setCoins] = useState('')
-  const [want, setWant] = useState<Record<string, string>>({})
+  const { values, set } = useResources()
+  const xpKey = (c: string) => `manhole:${c}`
+  const wantKey = (k: string) => `want:${k}`
 
   const src = gameData.xpSources.cartridgeModule
 
   const xpPool = useMemo(() => {
     const counts: Record<string, number> = {}
-    for (const c of COLORS) counts[c] = parseInput(xpCounts[c] ?? '')
+    for (const c of COLORS) counts[c] = parseInput(values[xpKey(c)] ?? '')
     return xpFromSources(src, counts)
-  }, [xpCounts, src])
-  const coinPool = parseInput(coins)
+  }, [values, src])
+  const coinPool = parseInput(values['coins'] ?? '')
 
   const need = useMemo(() => {
     let xp = 0
     let cn = 0
     for (const it of items) {
-      const q = parseInput(want[it.key] ?? '')
+      const q = parseInput(values[wantKey(it.key)] ?? '')
       xp += q * it.xp
       cn += q * it.coins
     }
     return { xp, coins: cn }
-  }, [want, items])
+  }, [values, items])
 
   const sourceByColor = (c: string) => src.find((s) => s.color === c)
 
@@ -63,10 +64,10 @@ export function CartridgeModuleCalc() {
               return (
                 <ResourceInput
                   key={c}
-                  label={s.source}
+                  label={cleanName(s.source)}
                   iconName={s.source}
-                  value={xpCounts[c] ?? ''}
-                  onChange={(v) => setXpCounts((p) => ({ ...p, [c]: v }))}
+                  value={values[xpKey(c)] ?? ''}
+                  onChange={(v) => set(xpKey(c), v)}
                 />
               )
             })}
@@ -74,7 +75,13 @@ export function CartridgeModuleCalc() {
           </div>
           <div className="input-col">
             <div className="col-head">Coins</div>
-            <ResourceInput label="Beetle Coins" iconName="Beetle Coins" value={coins} onChange={setCoins} wide />
+            <ResourceInput
+              label="Beetle Coins"
+              iconName="Beetle Coins"
+              value={values['coins'] ?? ''}
+              onChange={(v) => set('coins', v)}
+              wide
+            />
           </div>
         </div>
       </section>
@@ -114,8 +121,8 @@ export function CartridgeModuleCalc() {
                       className="mini"
                       inputMode="numeric"
                       placeholder="0"
-                      value={want[it.key] ?? ''}
-                      onChange={(e) => setWant((p) => ({ ...p, [it.key]: sanitizeResource(e.target.value) }))}
+                      value={values[wantKey(it.key)] ?? ''}
+                      onChange={(e) => set(wantKey(it.key), sanitizeResource(e.target.value))}
                     />
                   </td>
                   <td className="muted">{Number.isFinite(affordable) ? affordable : '∞'}</td>

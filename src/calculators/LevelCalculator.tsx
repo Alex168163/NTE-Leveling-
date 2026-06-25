@@ -1,15 +1,16 @@
 // Shared calculator for the two categories that have leveling + ascensions
 // (Characters and Arcs). Driven entirely by a config built from the parsed
 // markdown data.
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { Step, XpSource } from '../types'
 import { cumulativeCost, maxReach, xpFromSources, type Budget } from '../lib/calc'
-import { parseInput, short } from '../lib/format'
+import { parseInput, short, cleanName } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
 import { Slider } from '../components/Slider'
 import { XpEquivalent } from '../components/XpEquivalent'
+import { useResources } from '../state/resources'
 
 export interface MatInput {
   id: string
@@ -17,6 +18,8 @@ export interface MatInput {
   iconName: string
 }
 export interface LevelConfig {
+  id: string // 'char' | 'arc' — namespaces the target slider
+  xpKeyPrefix: string // 'guide' | 'dye' — namespaces XP-source counts
   steps: Step[]
   xpSources: XpSource[]
   xpLabel: string
@@ -26,19 +29,24 @@ export interface LevelConfig {
 const COLORS = ['Green', 'Blue', 'Purple'] as const
 
 export function LevelCalculator({ config }: { config: LevelConfig }) {
+  const { values, set } = useResources()
   const levels = config.steps.map((s) => s.to) // e.g. [20,30,...,80]
-  const [target, setTarget] = useState(levels[levels.length - 1])
-  const [xpCounts, setXpCounts] = useState<Record<string, string>>({})
-  const [coins, setCoins] = useState('')
-  const [matCounts, setMatCounts] = useState<Record<string, string>>({})
+
+  const targetKey = `ui:target:${config.id}`
+  const defaultTarget = levels[levels.length - 1]
+  const target = Number(values[targetKey] ?? defaultTarget) || defaultTarget
+  const setTarget = (lv: number) => set(targetKey, String(lv))
+
+  const xpKey = (c: string) => `${config.xpKeyPrefix}:${c}`
 
   const budget: Budget = useMemo(() => {
     const counts: Record<string, number> = {}
-    for (const c of COLORS) counts[c] = parseInput(xpCounts[c] ?? '')
+    for (const c of COLORS) counts[c] = parseInput(values[xpKey(c)] ?? '')
     const mats: Record<string, number> = {}
-    for (const m of config.matInputs) mats[m.id] = parseInput(matCounts[m.id] ?? '')
-    return { xp: xpFromSources(config.xpSources, counts), coins: parseInput(coins), mats }
-  }, [xpCounts, coins, matCounts, config])
+    for (const m of config.matInputs) mats[m.id] = parseInput(values[m.id] ?? '')
+    return { xp: xpFromSources(config.xpSources, counts), coins: parseInput(values['coins'] ?? ''), mats }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values, config])
 
   const totals = useMemo(() => cumulativeCost(config.steps, target), [config.steps, target])
   const reach = useMemo(() => maxReach(config.steps, budget), [config.steps, budget])
@@ -60,10 +68,10 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
               return (
                 <ResourceInput
                   key={c}
-                  label={src.source}
+                  label={cleanName(src.source)}
                   iconName={src.source}
-                  value={xpCounts[c] ?? ''}
-                  onChange={(v) => setXpCounts((p) => ({ ...p, [c]: v }))}
+                  value={values[xpKey(c)] ?? ''}
+                  onChange={(v) => set(xpKey(c), v)}
                 />
               )
             })}
@@ -77,8 +85,8 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             <ResourceInput
               label="Beetle Coins"
               iconName="Beetle Coins"
-              value={coins}
-              onChange={setCoins}
+              value={values['coins'] ?? ''}
+              onChange={(v) => set('coins', v)}
               wide
             />
             {config.matInputs.map((m) => (
@@ -86,8 +94,8 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
                 key={m.id}
                 label={m.label}
                 iconName={m.iconName}
-                value={matCounts[m.id] ?? ''}
-                onChange={(v) => setMatCounts((p) => ({ ...p, [m.id]: v }))}
+                value={values[m.id] ?? ''}
+                onChange={(v) => set(m.id, v)}
               />
             ))}
           </div>

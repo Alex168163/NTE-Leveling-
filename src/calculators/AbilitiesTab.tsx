@@ -4,10 +4,12 @@
 // are four such abilities). Tick each skill you've already maxed, AND enter how
 // many of each material you have — the "still need" list subtracts both and
 // keeps tracking everything else.
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { gameData } from '../lib/calc'
 import { parseInput, sanitizeResource, short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
+import { useResources } from '../state/resources'
+import { resourceKeyForMaterial } from '../lib/resourceKey'
 import type { AbilityRow } from '../types'
 
 const COMBAT_SKILLS = ['Base Attack', 'Redirect Skill', 'Ultimate', 'Support Skill']
@@ -64,23 +66,27 @@ export function AbilitiesTab() {
     { id: 'passive2', title: 'Passive Skill 2', rows: passive2 },
   ]
 
-  const [done, setDone] = useState<Record<string, boolean>>({})
-  const [have, setHave] = useState<Record<string, string>>({})
-  const onHave = (k: string, v: string) => setHave((p) => ({ ...p, [k]: v }))
+  const { values, set } = useResources()
+  const isDone = (id: string) => values[`adone:${id}`] === '1'
+  const setDoneFlag = (id: string, on: boolean) => set(`adone:${id}`, on ? '1' : '')
+  // Resource value for a material, shared across every tab via its canonical key.
+  const haveOf = (material: string) => values[resourceKeyForMaterial(material)] ?? ''
+  const setHaveOf = (material: string, v: string) => set(resourceKeyForMaterial(material), v)
 
   // Materials still required across every skill NOT yet ticked.
   const remaining = useMemo(() => {
     const map: Record<string, number> = {}
     const order: string[] = []
     for (const b of blocks) {
-      if (done[b.id]) continue
+      if (isDone(b.id)) continue
       for (const r of b.rows) {
         if (!(r.material in map)) order.push(r.material)
         map[r.material] = (map[r.material] ?? 0) + r.amount
       }
     }
     return order.map((material) => ({ material, amount: map[material] }))
-  }, [done, blocks])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values, blocks])
 
   return (
     <div className="calc">
@@ -95,12 +101,12 @@ export function AbilitiesTab() {
 
       <div className="ability-grid">
         {blocks.map((b) => (
-          <section key={b.id} className={`panel ability-card${done[b.id] ? ' done' : ''}`}>
+          <section key={b.id} className={`panel ability-card${isDone(b.id) ? ' done' : ''}`}>
             <label className="ability-head">
               <input
                 type="checkbox"
-                checked={!!done[b.id]}
-                onChange={(e) => setDone((p) => ({ ...p, [b.id]: e.target.checked }))}
+                checked={isDone(b.id)}
+                onChange={(e) => setDoneFlag(b.id, e.target.checked)}
               />
               <h4>{b.title}</h4>
             </label>
@@ -128,8 +134,8 @@ export function AbilitiesTab() {
                 key={r.material}
                 material={r.material}
                 needed={r.amount}
-                have={have[r.material] ?? ''}
-                onHave={(v) => onHave(r.material, v)}
+                have={haveOf(r.material)}
+                onHave={(v) => setHaveOf(r.material, v)}
               />
             ))
           )}
@@ -144,8 +150,8 @@ export function AbilitiesTab() {
               key={l.material}
               material={l.material}
               needed={l.amount}
-              have={have[l.material] ?? ''}
-              onHave={(v) => onHave(l.material, v)}
+              have={haveOf(l.material)}
+              onHave={(v) => setHaveOf(l.material, v)}
             />
           ))}
         </div>

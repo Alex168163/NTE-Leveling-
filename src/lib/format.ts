@@ -20,6 +20,12 @@ export function comma(n: number): string {
 // Largest value any resource input accepts (100 million).
 export const MAX_INPUT = 100_000_000
 
+// Strip a leading "Colour / " from an XP-source label:
+// "Green / Rising Hunter Guide" -> "Rising Hunter Guide".
+export function cleanName(s: string): string {
+  return s.includes('/') ? s.split('/').pop()!.trim() : s.trim()
+}
+
 // Parse a user-typed resource value. Accepts plain numbers and k/m suffixes,
 // where k = thousand (1k = 1000) and m = million (1m = 1000000). Capped at 100m.
 export function parseInput(raw: string): number {

@@ -96,6 +96,27 @@ input,
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.reset-btn {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(255, 92, 244, 0.12);
+  border: 1px solid var(--magenta);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  text-shadow: none;
+}
+.reset-btn:hover {
+  background: rgba(255, 92, 244, 0.28);
+  box-shadow: 0 0 14px rgba(255, 92, 244, 0.5);
+}
 
 /* ---- tabs ---- */
 .tabs {
