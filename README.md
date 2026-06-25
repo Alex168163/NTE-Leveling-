@@ -49,8 +49,18 @@ npm run electron:dev   # same app inside the desktop (.exe-style) window
 
 ```bash
 npm run build          # production web build -> dist/
-npm run dist           # Windows installer (.exe) -> release/   (electron-builder)
+npm run package:win    # portable desktop app -> release/NTE Leveling Calculator-win32-x64/
+                       #   run "NTE Leveling Calculator.exe" inside that folder (no install needed)
+npm run dist           # full Windows installer (.exe) -> release/   (electron-builder)
 ```
+
+> **Note on `npm run dist`:** building the *installer* with electron-builder needs to
+> create symlinks while extracting its signing tools, which on Windows requires
+> **Developer Mode** (Settings → Privacy & security → For developers) **or an
+> elevated/admin terminal**. If you hit `Cannot create symbolic link : A required
+> privilege is not held`, enable Developer Mode and retry — or just use
+> `npm run package:win`, which produces a ready-to-run portable `.exe` with no
+> signing toolchain.
 
 ## Project layout
 
