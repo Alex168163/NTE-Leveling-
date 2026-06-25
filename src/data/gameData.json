@@ -272,12 +272,6 @@
       "maxLevel": 20,
       "xp": 693000,
       "coins": 14000
-    },
-    {
-      "rarity": "Purple",
-      "maxLevel": 20,
-      "xp": 463000,
-      "coins": 10000
     }
   ],
   "modules": [
@@ -286,12 +280,6 @@
       "maxLevel": 20,
       "xp": 418000,
       "coins": 9000
-    },
-    {
-      "rarity": "Purple",
-      "maxLevel": 20,
-      "xp": 188000,
-      "coins": 4000
     }
   ],
   "abilities": {
@@ -307,7 +295,7 @@
         "amount": 16
       },
       {
-        "material": "Gold Ability Upgrade Material",
+        "material": "Purple Ability Upgrade Material",
         "isExample": false,
         "amount": 16
       },
@@ -317,7 +305,7 @@
         "amount": 10
       },
       {
-        "material": "Silver Ability Upgrade Material",
+        "material": "Blue Ability Upgrade Material",
         "isExample": false,
         "amount": 10
       },
@@ -327,7 +315,7 @@
         "amount": 10
       },
       {
-        "material": "Bronze Ability Upgrade Material",
+        "material": "Green Ability Upgrade Material",
         "isExample": false,
         "amount": 10
       },
@@ -344,7 +332,7 @@
         "amount": 1
       },
       {
-        "material": "Silver Ability Upgrade Material",
+        "material": "Blue Ability Upgrade Material",
         "isExample": false,
         "amount": 2
       },
@@ -361,7 +349,7 @@
         "amount": 2
       },
       {
-        "material": "Gold Ability Upgrade Material",
+        "material": "Purple Ability Upgrade Material",
         "isExample": false,
         "amount": 1
       },
@@ -434,5 +422,374 @@
         "xp": 20000
       }
     ]
-  }
+  },
+  "moduleTypes": [
+    {
+      "type": "Type II",
+      "xp": 278000,
+      "coins": 5560
+    },
+    {
+      "type": "Type III",
+      "xp": 418000,
+      "coins": 8360
+    },
+    {
+      "type": "Type IV",
+      "xp": 558000,
+      "coins": 11160
+    }
+  ],
+  "filledModuleSet": {
+    "Type IV": 1,
+    "Type III": 4,
+    "Type II": 2
+  },
+  "inGameNames": {
+    "anomalyHunt": [
+      "Charging Knight Spark Plug",
+      "A Page from Delusion's Shore",
+      "Water Moon Pick",
+      "Nest Guard Fragment",
+      "Confessional Flower Seed",
+      "Colorful Ticket Stub",
+      "Tear of the Sea"
+    ],
+    "anomalyPilgrimage": [
+      "Dress Sleeves of Vanity",
+      "Good Boy Stamp",
+      "Eternal Memory"
+    ],
+    "abilityGreen": [
+      "Nestling's Longing",
+      "FNG",
+      "First Expectations",
+      "Synchronicity of Thought",
+      "Hesitation of the Waves"
+    ],
+    "abilityBlue": [
+      "Dove's Flutter",
+      "CO",
+      "Known Weariness",
+      "Resonance of Faith",
+      "Suspended Whispers"
+    ],
+    "abilityPurple": [
+      "The Olive Branch",
+      "White Rose",
+      "Black Hat",
+      "Heart-Racing Night",
+      "The Second Self"
+    ],
+    "wdGreen": [
+      "Lost Whispers",
+      "Fading Silhouette",
+      "Blurred Numeral",
+      "Suspended Delusions"
+    ],
+    "wdBlue": [
+      "Unsolved Numeral",
+      "Obscure Whispers",
+      "Blurred Silhouette",
+      "Yearning Delusions"
+    ],
+    "wdPurple": [
+      "Transcendent Delusions",
+      "Distorted Numeral",
+      "Chaos Silhouette",
+      "Paradoxical Whispers"
+    ]
+  },
+  "nameToCategory": {
+    "Charging Knight Spark Plug": "anomalyHunt",
+    "A Page from Delusion's Shore": "anomalyHunt",
+    "Water Moon Pick": "anomalyHunt",
+    "Nest Guard Fragment": "anomalyHunt",
+    "Confessional Flower Seed": "anomalyHunt",
+    "Colorful Ticket Stub": "anomalyHunt",
+    "Tear of the Sea": "anomalyHunt",
+    "Dress Sleeves of Vanity": "anomalyPilgrimage",
+    "Good Boy Stamp": "anomalyPilgrimage",
+    "Eternal Memory": "anomalyPilgrimage",
+    "Nestling's Longing": "abilityGreen",
+    "FNG": "abilityGreen",
+    "First Expectations": "abilityGreen",
+    "Synchronicity of Thought": "abilityGreen",
+    "Hesitation of the Waves": "abilityGreen",
+    "Dove's Flutter": "abilityBlue",
+    "CO": "abilityBlue",
+    "Known Weariness": "abilityBlue",
+    "Resonance of Faith": "abilityBlue",
+    "Suspended Whispers": "abilityBlue",
+    "The Olive Branch": "abilityPurple",
+    "White Rose": "abilityPurple",
+    "Black Hat": "abilityPurple",
+    "Heart-Racing Night": "abilityPurple",
+    "The Second Self": "abilityPurple",
+    "Lost Whispers": "wdGreen",
+    "Fading Silhouette": "wdGreen",
+    "Blurred Numeral": "wdGreen",
+    "Suspended Delusions": "wdGreen",
+    "Unsolved Numeral": "wdBlue",
+    "Obscure Whispers": "wdBlue",
+    "Blurred Silhouette": "wdBlue",
+    "Yearning Delusions": "wdBlue",
+    "Transcendent Delusions": "wdPurple",
+    "Distorted Numeral": "wdPurple",
+    "Chaos Silhouette": "wdPurple",
+    "Paradoxical Whispers": "wdPurple"
+  },
+  "roster": [
+    {
+      "name": "Adler",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "Water Moon Pick",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "First Expectations",
+        "abilityBlue": "Known Weariness",
+        "abilityPurple": "Black Hat",
+        "wdGreen": "Blurred Numeral",
+        "wdBlue": "Unsolved Numeral",
+        "wdPurple": "Distorted Numeral"
+      }
+    },
+    {
+      "name": "Aurelia",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "Nest Guard Fragment",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "FNG",
+        "abilityBlue": "CO",
+        "abilityPurple": "White Rose",
+        "wdGreen": "Suspended Delusions",
+        "wdBlue": "Yearning Delusions",
+        "wdPurple": "Transcendent Delusions"
+      }
+    },
+    {
+      "name": "Baicang",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Nest Guard Fragment",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "First Expectations",
+        "abilityBlue": "Known Weariness",
+        "abilityPurple": "Black Hat",
+        "wdGreen": "Blurred Numeral",
+        "wdBlue": "Unsolved Numeral",
+        "wdPurple": "Distorted Numeral"
+      }
+    },
+    {
+      "name": "Chaos",
+      "rank": "S",
+      "materials": {
+        "anomalyPilgrimage": "Eternal Memory",
+        "abilityGreen": "Synchronicity of Thought",
+        "abilityBlue": "Resonance of Faith",
+        "abilityPurple": "Heart-Racing Night",
+        "wdGreen": "Suspended Delusions",
+        "wdBlue": "Yearning Delusions",
+        "wdPurple": "Transcendent Delusions"
+      }
+    },
+    {
+      "name": "Chiz",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Tear of the Sea",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "Nestling's Longing",
+        "abilityBlue": "Dove's Flutter",
+        "abilityPurple": "The Olive Branch",
+        "wdGreen": "Lost Whispers",
+        "wdBlue": "Obscure Whispers",
+        "wdPurple": "Paradoxical Whispers"
+      }
+    },
+    {
+      "name": "Daffodil",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Charging Knight Spark Plug",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Hesitation of the Waves",
+        "abilityBlue": "Suspended Whispers",
+        "abilityPurple": "The Second Self",
+        "wdGreen": "Suspended Delusions",
+        "wdBlue": "Yearning Delusions",
+        "wdPurple": "Transcendent Delusions"
+      }
+    },
+    {
+      "name": "Edgar",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "Colorful Ticket Stub",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "Nestling's Longing",
+        "abilityBlue": "Dove's Flutter",
+        "abilityPurple": "The Olive Branch",
+        "wdGreen": "Lost Whispers",
+        "wdBlue": "Obscure Whispers",
+        "wdPurple": "Paradoxical Whispers"
+      }
+    },
+    {
+      "name": "Esper Zero",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Charging Knight Spark Plug",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "Nestling's Longing",
+        "abilityBlue": "Suspended Whispers",
+        "abilityPurple": "The Olive Branch",
+        "wdGreen": "Lost Whispers",
+        "wdBlue": "Obscure Whispers",
+        "wdPurple": "Paradoxical Whispers"
+      }
+    },
+    {
+      "name": "Fadia",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Water Moon Pick",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Synchronicity of Thought",
+        "abilityBlue": "Resonance of Faith",
+        "abilityPurple": "Heart-Racing Night",
+        "wdGreen": "Fading Silhouette",
+        "wdBlue": "Blurred Silhouette",
+        "wdPurple": "Chaos Silhouette"
+      }
+    },
+    {
+      "name": "Haniel",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "Nest Guard Fragment",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Hesitation of the Waves",
+        "abilityBlue": "Suspended Whispers",
+        "abilityPurple": "The Second Self",
+        "wdGreen": "Blurred Numeral",
+        "wdBlue": "Unsolved Numeral",
+        "wdPurple": "Distorted Numeral"
+      }
+    },
+    {
+      "name": "Hathor",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Colorful Ticket Stub",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "Synchronicity of Thought",
+        "abilityBlue": "Resonance of Faith",
+        "abilityPurple": "Heart-Racing Night",
+        "wdGreen": "Suspended Delusions",
+        "wdBlue": "Yearning Delusions",
+        "wdPurple": "Transcendent Delusions"
+      }
+    },
+    {
+      "name": "Hotori",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Confessional Flower Seed",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Nestling's Longing",
+        "abilityBlue": "Dove's Flutter",
+        "abilityPurple": "The Olive Branch",
+        "wdGreen": "Lost Whispers",
+        "wdBlue": "Obscure Whispers",
+        "wdPurple": "Paradoxical Whispers"
+      }
+    },
+    {
+      "name": "Jiuyuan",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Tear of the Sea",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Synchronicity of Thought",
+        "abilityBlue": "Resonance of Faith",
+        "abilityPurple": "Heart-Racing Night",
+        "wdGreen": "Fading Silhouette",
+        "wdBlue": "Blurred Silhouette",
+        "wdPurple": "Chaos Silhouette"
+      }
+    },
+    {
+      "name": "Lacrimosa",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Confessional Flower Seed",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Hesitation of the Waves",
+        "abilityBlue": "Suspended Whispers",
+        "abilityPurple": "The Second Self",
+        "wdGreen": "Lost Whispers",
+        "wdBlue": "Obscure Whispers",
+        "wdPurple": "Paradoxical Whispers"
+      }
+    },
+    {
+      "name": "Mint",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "A Page from Delusion's Shore",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "FNG",
+        "abilityBlue": "CO",
+        "abilityPurple": "White Rose",
+        "wdGreen": "Fading Silhouette",
+        "wdBlue": "Blurred Silhouette",
+        "wdPurple": "Chaos Silhouette"
+      }
+    },
+    {
+      "name": "Nanally",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "A Page from Delusion's Shore",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "FNG",
+        "abilityBlue": "CO",
+        "abilityPurple": "White Rose",
+        "wdGreen": "Fading Silhouette",
+        "wdBlue": "Blurred Silhouette",
+        "wdPurple": "Chaos Silhouette"
+      }
+    },
+    {
+      "name": "Sakiri",
+      "rank": "S",
+      "materials": {
+        "anomalyHunt": "Charging Knight Spark Plug",
+        "anomalyPilgrimage": "Good Boy Stamp",
+        "abilityGreen": "First Expectations",
+        "abilityBlue": "Known Weariness",
+        "abilityPurple": "Black Hat",
+        "wdGreen": "Blurred Numeral",
+        "wdBlue": "Unsolved Numeral",
+        "wdPurple": "Distorted Numeral"
+      }
+    },
+    {
+      "name": "Skia",
+      "rank": "A",
+      "materials": {
+        "anomalyHunt": "Confessional Flower Seed",
+        "anomalyPilgrimage": "Dress Sleeves of Vanity",
+        "abilityGreen": "Hesitation of the Waves",
+        "abilityBlue": "Suspended Whispers",
+        "abilityPurple": "The Second Self",
+        "wdGreen": "Suspended Delusions",
+        "wdBlue": "Yearning Delusions",
+        "wdPurple": "Transcendent Delusions"
+      }
+    }
+  ]
 }

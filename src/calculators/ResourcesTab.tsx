@@ -38,11 +38,19 @@ export function ResourcesTab() {
     xpGroup('Arc XP — Dyes', gameData.xpSources.arc, 'dye'),
     xpGroup('Cartridge / Module XP — Manholes', gameData.xpSources.cartridgeModule, 'manhole'),
     {
-      title: 'World Drop Materials',
+      title: 'World Materials',
       items: [
-        { key: 'wd:Green', label: 'Green World Drop Material', iconName: 'Green World Material' },
-        { key: 'wd:Blue', label: 'Blue World Drop Material', iconName: 'Blue World Material' },
-        { key: 'wd:Purple', label: 'Purple World Drop Material', iconName: 'Purple World Material' },
+        { key: 'wd:Green', label: 'Green World Material', iconName: 'Green World Material' },
+        { key: 'wd:Blue', label: 'Blue World Material', iconName: 'Blue World Material' },
+        { key: 'wd:Purple', label: 'Purple World Material', iconName: 'Purple World Material' },
+      ],
+    },
+    {
+      title: 'Ability Upgrade Materials',
+      items: [
+        { key: 'ability:Green', label: 'Green Ability Upgrade Material', iconName: 'Green Ability Upgrade Material' },
+        { key: 'ability:Blue', label: 'Blue Ability Upgrade Material', iconName: 'Blue Ability Upgrade Material' },
+        { key: 'ability:Purple', label: 'Purple Ability Upgrade Material', iconName: 'Purple Ability Upgrade Material' },
       ],
     },
     {
@@ -61,11 +69,10 @@ export function ResourcesTab() {
       ],
     },
     {
-      title: 'Ability Upgrade Materials',
+      title: 'Fill-in Materials (substitutes)',
       items: [
-        { key: 'ability:Gold', label: 'Gold Ability Upgrade Material', iconName: 'Gold Ability Upgrade' },
-        { key: 'ability:Silver', label: 'Silver Ability Upgrade Material', iconName: 'Silver Ability Upgrade' },
-        { key: 'ability:Bronze', label: 'Bronze Ability Upgrade Material', iconName: 'Bronze Ability Upgrade' },
+        { key: 'heterogeneousUnit', label: 'Heterogeneous Unit', iconName: 'Heterogeneous Unit' },
+        { key: 'expansionCore', label: 'Expansion Core', iconName: 'Expansion Core' },
       ],
     },
     {
@@ -83,9 +90,20 @@ export function ResourcesTab() {
         <h3>My Resources</h3>
         <p className="reach-note">
           Fill in everything you own <strong>here, once</strong>. These values are shared across the
-          whole app, so they automatically fill in on every other tab — Characters, Arcs, Cartridges
-          &amp; Modules, and Abilities. Inputs accept <strong>k</strong> (thousand) and{' '}
-          <strong>m</strong> (million), e.g. <code>26k</code> or <code>1.6m</code>, up to 100m.
+          whole app, so they automatically fill in on every other tab — and they stay the same no
+          matter which character is selected. Inputs accept <strong>k</strong> (thousand) and{' '}
+          <strong>m</strong> (million), e.g. <code>26k</code> or <code>1.6m</code>, up to 999m.
+        </p>
+        <p className="reach-note">
+          Any material-selection boxes aren't calculated here — either use them and add that material
+          here, or hold on and use them when needed. Just know that if you have some, you can fill in
+          materials you might be missing currently.
+        </p>
+        <p className="reach-note">
+          <strong>Fill-in materials:</strong> a <em>Heterogeneous Unit</em> counts as any 1 green
+          world material, and an <em>Expansion Core</em> as 1 green ability upgrade. They top up
+          materials you're missing (fill rates — Green 1:1, Blue 3:1, Purple 9:1) and are only used
+          once your real resources of that type run out.
         </p>
       </section>
 

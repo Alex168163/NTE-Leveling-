@@ -8,8 +8,10 @@ import { useMemo } from 'react'
 import { gameData } from '../lib/calc'
 import { parseInput, sanitizeResource, short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
+import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
 import { resourceKeyForMaterial } from '../lib/resourceKey'
+import { SELECTED_KEY, displayLabel } from '../lib/characters'
 import type { AbilityRow } from '../types'
 
 const COMBAT_SKILLS = ['Base Attack', 'Redirect Skill', 'Ultimate', 'Support Skill']
@@ -23,11 +25,13 @@ interface Block {
 // A material-tracker row: needed amount, an input for what you own, and status.
 function TrackRow({
   material,
+  display,
   needed,
   have,
   onHave,
 }: {
   material: string
+  display?: string
   needed: number
   have: string
   onHave: (v: string) => void
@@ -37,14 +41,14 @@ function TrackRow({
   const complete = left === 0
   return (
     <div className={`track-row${complete ? ' complete' : ''}`}>
-      <IconStack name={material} />
-      <span className="cost-label">{material}</span>
+      <IconStack name={display ?? material} />
+      <span className="cost-label">{display ?? material}</span>
       <input
         className="track-input"
         type="text"
         inputMode="text"
         placeholder="0"
-        title="How many you have. Accepts k/m (max 100m)."
+        title="How many you have. Accepts k/m (max 999m)."
         value={have}
         onChange={(e) => onHave(sanitizeResource(e.target.value))}
         spellCheck={false}
@@ -67,11 +71,14 @@ export function AbilitiesTab() {
   ]
 
   const { values, set } = useResources()
+  const char = values[SELECTED_KEY] ?? ''
   const isDone = (id: string) => values[`adone:${id}`] === '1'
   const setDoneFlag = (id: string, on: boolean) => set(`adone:${id}`, on ? '1' : '')
   // Resource value for a material, shared across every tab via its canonical key.
   const haveOf = (material: string) => values[resourceKeyForMaterial(material)] ?? ''
   const setHaveOf = (material: string, v: string) => set(resourceKeyForMaterial(material), v)
+  // Character-specific display name for a generic material (#5).
+  const label = (material: string) => displayLabel(resourceKeyForMaterial(material), material, char)
 
   // Materials still required across every skill NOT yet ticked.
   const remaining = useMemo(() => {
@@ -90,6 +97,7 @@ export function AbilitiesTab() {
 
   return (
     <div className="calc">
+      <CharacterBanner />
       <section className="panel reach">
         <h3>Progression checker — abilities &amp; passives</h3>
         <p className="reach-note">
@@ -114,7 +122,7 @@ export function AbilitiesTab() {
               {b.rows.map((r) => (
                 <div className="cost-row" key={r.material}>
                   <IconStack name={r.material} />
-                  <span className="cost-label">{r.material}</span>
+                  <span className="cost-label">{label(r.material)}</span>
                   <span className="cost-amount">{short(r.amount)}</span>
                 </div>
               ))}
@@ -133,6 +141,7 @@ export function AbilitiesTab() {
               <TrackRow
                 key={r.material}
                 material={r.material}
+                display={label(r.material)}
                 needed={r.amount}
                 have={haveOf(r.material)}
                 onHave={(v) => setHaveOf(r.material, v)}

@@ -13,11 +13,14 @@ import { dirname, join } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const MD_PATH = join(ROOT, 'NTE_Leveling.md')
+const UPD_PATH = join(ROOT, 'NTE Update', 'NTE_Update.md')
 const OUT_PATH = join(ROOT, 'src', 'data', 'gameData.json')
 const ICONS_PATH = join(ROOT, 'src', 'data', 'icons.json')
 const ASSETS_DIR = join(ROOT, 'public', 'assets')
 
+// Two sources of truth: the base reference and the update. Both are parsed.
 const md = readFileSync(MD_PATH, 'utf8')
+const upd = readFileSync(UPD_PATH, 'utf8')
 
 // --- number parsing -------------------------------------------------------
 // "103k" -> 103000, "1.6m" -> 1600000, "26,000" -> 26000, "—"/"-" -> 0
@@ -48,8 +51,8 @@ function mat(raw) {
 // --- table extraction -----------------------------------------------------
 // Find the first markdown table that appears after a heading whose text
 // contains `headingNeedle`. Returns array of row objects keyed by header cells.
-function tableAfter(headingNeedle) {
-  const lines = md.split(/\r?\n/)
+function tableAfter(headingNeedle, src = md) {
+  const lines = src.split(/\r?\n/)
   let i = lines.findIndex(
     (l) => /^#{1,6}\s/.test(l) && l.toLowerCase().includes(headingNeedle.toLowerCase()),
   )
@@ -137,8 +140,9 @@ const cm = (needle) =>
     xp: num(r['XP']),
     coins: num(r['Coins']),
   }))
-data.cartridges = cm('Cost to Upgrade Cartridges')
-data.modules = cm('Cost to Upgrade Modules')
+// #1 (update): only Gold cartridges/modules going forward — drop the Purples.
+data.cartridges = cm('Cost to Upgrade Cartridges').filter((r) => /gold/i.test(r.rarity))
+data.modules = cm('Cost to Upgrade Modules').filter((r) => /gold/i.test(r.rarity))
 
 // Abilities (progression checker)
 const abilityRows = (needle) =>
@@ -178,6 +182,86 @@ data.xpSources = {
   cartridgeModule: xpRows('Cartridges / Modules XP'),
 }
 
+// ===========================================================================
+// NTE_Update.md — the second source of truth. Parsed and merged here.
+// ===========================================================================
+
+// Slice an "## N. ..." section out of the update markdown so look-ups inside
+// it can't collide with same-named headings elsewhere in the file.
+function section(src, startNeedle, endNeedle) {
+  const lines = src.split(/\r?\n/)
+  const start = lines.findIndex((l) => /^##\s/.test(l) && l.includes(startNeedle))
+  if (start === -1) return ''
+  let end = lines.length
+  if (endNeedle) {
+    const e = lines.findIndex((l, i) => i > start && /^##\s/.test(l) && l.includes(endNeedle))
+    if (e !== -1) end = e
+  }
+  return lines.slice(start, end).join('\n')
+}
+
+// #1: Module types — each maxes to Lv 20 at its own cost.
+data.moduleTypes = tableAfter('Module Types', upd).map((r) => ({
+  type: r['Module Type'].trim(),
+  xp: num(r['XP']),
+  coins: num(r['Beetle Coins']),
+}))
+// A "filled" module set used on the 1->80 tab.
+data.filledModuleSet = { 'Type IV': 1, 'Type III': 4, 'Type II': 2 }
+
+// #18 + #19: example material categories. Bronze/Silver/Gold ability upgrades
+// are renamed to Green/Blue/Purple per #16. Each category carries its ordered
+// in-game names (#18) and the per-character assignment (#19).
+const SEC18 = section(upd, '18.', '19.')
+const SEC19 = section(upd, '19.')
+const CATEGORIES = [
+  { key: 'anomalyHunt', name18: 'Anomaly Hunt Material', name19: 'Anomaly Hunt Materials' },
+  { key: 'anomalyPilgrimage', name18: 'Anomaly Pilgrimage Material', name19: 'Anomaly Pilgrimage Materials' },
+  { key: 'abilityGreen', name18: 'Bronze Ability Upgrade', name19: 'Bronze Ability Upgrades' },
+  { key: 'abilityBlue', name18: 'Silver Ability Upgrade', name19: 'Silver Ability Upgrades' },
+  { key: 'abilityPurple', name18: 'Gold Ability Upgrade', name19: 'Gold Ability Upgrades' },
+  { key: 'wdGreen', name18: 'Green World Material', name19: 'Green World Materials' },
+  { key: 'wdBlue', name18: 'Blue World Material', name19: 'Blue World Materials' },
+  { key: 'wdPurple', name18: 'Purple World Material', name19: 'Purple World Materials' },
+]
+
+data.inGameNames = {} // category -> [name in example order]
+const nameToCategory = {} // in-game name -> category
+const charMats = {} // character -> { category: in-game material name }
+
+for (const c of CATEGORIES) {
+  // #18 — ordered in-game names
+  const arr = []
+  for (const r of tableAfter(c.name18, SEC18)) {
+    const ex = num(r['Example'])
+    const nm = (r['In-Game Name'] || '').trim()
+    if (nm) {
+      arr[ex - 1] = nm
+      nameToCategory[nm] = c.key
+    }
+  }
+  data.inGameNames[c.key] = arr.filter(Boolean)
+
+  // #19 — material -> characters, inverted to character -> material
+  for (const r of tableAfter(c.name19, SEC19)) {
+    const material = (r['Material'] || '').trim()
+    const chars = (r['Characters'] || '').split(',').map((s) => s.trim()).filter(Boolean)
+    for (const ch of chars) (charMats[ch] ||= {})[c.key] = material
+  }
+}
+data.nameToCategory = nameToCategory
+
+// Character roster: every character named in #19, with rank read from its
+// portrait filename ("Adler - A.png" -> rank A).
+const rankByName = {}
+for (const f of readdirSync(ASSETS_DIR)) {
+  const m = f.match(/^(.+?)\s*-\s*([AS])\.png$/i)
+  if (m) rankByName[m[1].trim()] = m[2].toUpperCase()
+}
+data.roster = Object.keys(charMats)
+  .sort()
+  .map((name) => ({ name, rank: rankByName[name] || null, materials: charMats[name] }))
+
 writeFileSync(OUT_PATH, JSON.stringify(data, null, 2) + '\n')
 
 // --- icon manifest --------------------------------------------------------
@@ -189,7 +273,9 @@ function baseName(file) {
   return file
     .replace(/\.(png|svg)$/i, '')
     .replace(/\s*Example\s*\d*$/i, '') // "... Example 3" / "... Example"
+    .replace(/\s*-\s*[AS]$/i, '') // character portrait "Adler - A" -> "Adler"
     .replace(/\s+\d+$/i, '') // trailing bare number
+    .replace(/\s*-\s*$/, '') // trailing " -" left by module-type "Type II - Example 1"
     .replace(/Materal/gi, 'Material')
     .trim()
 }

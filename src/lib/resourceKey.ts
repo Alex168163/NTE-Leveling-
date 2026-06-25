@@ -13,14 +13,15 @@ export function resourceKeyForMaterial(name: string): string {
   if (n.includes('anomaly hunt')) return 'anomalyHunt'
   if (n.includes('anomaly pilgrimage')) return 'anomalyPilgrimage'
 
+  if (n.includes('heterogeneous')) return 'heterogeneousUnit'
+  if (n.includes('expansion core')) return 'expansionCore'
+
   const color = (n.match(/green|blue|purple/) || [])[0]
   const cap = color ? color[0].toUpperCase() + color.slice(1) : ''
+  // Ability upgrades now use Green/Blue/Purple wording (#16).
+  if (n.includes('ability')) return color ? `ability:${cap}` : 'ability'
   if (n.includes('world')) return color ? `wd:${cap}` : 'wd'
   if (n.includes('arc')) return color ? `arc:${cap}` : 'arc'
-
-  const tier = (n.match(/gold|silver|bronze/) || [])[0]
-  const tierCap = tier ? tier[0].toUpperCase() + tier.slice(1) : ''
-  if (n.includes('ability')) return tier ? `ability:${tierCap}` : 'ability'
 
   if (n.includes('dreamless')) return 'dreamlessSeed'
   if (n.includes('fons')) return 'fons'

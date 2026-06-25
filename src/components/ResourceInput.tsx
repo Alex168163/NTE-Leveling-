@@ -25,7 +25,7 @@ export function ResourceInput({
         inputMode="text"
         className={wide ? 'wide' : ''}
         placeholder="0"
-        title="Accepts k (thousand) and m (million), e.g. 26k or 1.6m — max 100m"
+        title="Accepts k (thousand) and m (million), e.g. 26k or 1.6m — max 999m"
         value={value}
         onChange={(e) => onChange(sanitizeResource(e.target.value))}
         spellCheck={false}

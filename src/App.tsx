@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useResources } from './state/resources'
 import { ResourcesTab } from './calculators/ResourcesTab'
+import { MyCharactersTab } from './calculators/MyCharactersTab'
 import { CharacterCalc } from './calculators/CharacterCalc'
 import { ArcCalc } from './calculators/ArcCalc'
 import { CartridgeModuleCalc } from './calculators/CartridgeModuleCalc'
@@ -16,10 +17,11 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: 'resources', label: 'My Resources', hint: 'Fill once · fills everywhere', render: () => <ResourcesTab /> },
-  { id: 'characters', label: 'Characters', hint: 'Hunter Guides · XP & ascensions', render: () => <CharacterCalc /> },
-  { id: 'arcs', label: 'Arcs', hint: 'Dyes · XP & ascensions', render: () => <ArcCalc /> },
-  { id: 'cm', label: 'Cartridges & Modules', hint: 'Manholes · max to 20', render: () => <CartridgeModuleCalc /> },
-  { id: 'abilities', label: 'Abilities & Life Skills', hint: 'Progression checker', render: () => <AbilitiesTab /> },
+  { id: 'mychars', label: 'My Characters', hint: 'Pick who you own', render: () => <MyCharactersTab /> },
+  { id: 'characters', label: 'Character Leveling', hint: 'Hunter Guides · XP & ascensions', render: () => <CharacterCalc /> },
+  { id: 'arcs', label: 'Arc Leveling', hint: 'Dyes · XP & ascensions', render: () => <ArcCalc /> },
+  { id: 'cm', label: 'Cartridge and Module Leveling', hint: 'Manholes · max to 20', render: () => <CartridgeModuleCalc /> },
+  { id: 'abilities', label: 'Ability & Life Skill Leveling', hint: 'Progression checker', render: () => <AbilitiesTab /> },
   { id: 'full', label: '1 → 80 Everything', hint: 'The grand total', render: () => <FullMaxTab /> },
 ]
 

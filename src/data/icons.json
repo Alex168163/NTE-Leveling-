@@ -1,4 +1,13 @@
 {
+  "A-Rank": [
+    "assets/A-Rank.png"
+  ],
+  "Adler": [
+    "assets/Adler - A.png"
+  ],
+  "Anima": [
+    "assets/Anima.png"
+  ],
   "Anomaly Hunt Material": [
     "assets/Anomaly Hunt Material Example 1.png",
     "assets/Anomaly Hunt Material Example 2.png",
@@ -12,6 +21,12 @@
     "assets/Anomaly Pilgrimage Material Example 1.png",
     "assets/Anomaly Pilgrimage Material Example 2.png",
     "assets/Anomaly Pilgrimage Material Example 3.png"
+  ],
+  "Aurelia": [
+    "assets/Aurelia - A.png"
+  ],
+  "Baicang": [
+    "assets/Baicang - S.png"
   ],
   "Beetle Coins": [
     "assets/Beetle Coins.png"
@@ -35,17 +50,61 @@
     "assets/Bronze Ability Upgrade Example 4.png",
     "assets/Bronze Ability Upgrade Example 5.png"
   ],
+  "Cartridge": [
+    "assets/Cartridge Example 1.png",
+    "assets/Cartridge Example 10.png",
+    "assets/Cartridge Example 11.png",
+    "assets/Cartridge Example 12.png",
+    "assets/Cartridge Example 2.png",
+    "assets/Cartridge Example 3.png",
+    "assets/Cartridge Example 4.png",
+    "assets/Cartridge Example 5.png",
+    "assets/Cartridge Example 6.png",
+    "assets/Cartridge Example 7.png",
+    "assets/Cartridge Example 8.png",
+    "assets/Cartridge Example 9.png"
+  ],
+  "Chaos": [
+    "assets/Chaos - S.png"
+  ],
+  "Chaos Type not character": [
+    "assets/Chaos Type not character.png"
+  ],
   "Chaotic Dye": [
     "assets/Chaotic Dye.png"
+  ],
+  "Chiz": [
+    "assets/Chiz - S.png"
+  ],
+  "CM-XP": [
+    "assets/CM-XP.svg"
   ],
   "Colorless Dye": [
     "assets/Colorless Dye.png"
   ],
+  "Cosmos": [
+    "assets/Cosmos.png"
+  ],
+  "Daffodil": [
+    "assets/Daffodil - S.png"
+  ],
   "Dreamless Seed": [
     "assets/Dreamless Seed.png"
   ],
+  "Edgar": [
+    "assets/Edgar - A.png"
+  ],
   "Elite Hunter Guide": [
     "assets/Elite Hunter Guide.png"
+  ],
+  "Esper Zero": [
+    "assets/Esper Zero - S.png"
+  ],
+  "Expansion Core": [
+    "assets/Expansion Core.png"
+  ],
+  "Fadia": [
+    "assets/Fadia - S.png"
   ],
   "Fons": [
     "assets/Fons.png"
@@ -69,6 +128,30 @@
     "assets/Green World Materal Example 4.png",
     "assets/Green World Materal Example.png"
   ],
+  "Haniel": [
+    "assets/Haniel - A.png"
+  ],
+  "Hathor": [
+    "assets/Hathor - S.png"
+  ],
+  "Heterogeneous Unit": [
+    "assets/Heterogeneous Unit.png"
+  ],
+  "Hotori": [
+    "assets/Hotori - S.png"
+  ],
+  "Incantation": [
+    "assets/Incantation.png"
+  ],
+  "Jiuyuan": [
+    "assets/Jiuyuan - S.png"
+  ],
+  "Lacrimosa": [
+    "assets/Lacrimosa - S.png"
+  ],
+  "Lakshana": [
+    "assets/Lakshana.png"
+  ],
   "Light Dye": [
     "assets/Light Dye.png"
   ],
@@ -80,6 +163,33 @@
   ],
   "Manholer Thug": [
     "assets/Manholer Thug.png"
+  ],
+  "Mint": [
+    "assets/Mint - A.png"
+  ],
+  "Module Type II": [
+    "assets/Module Type II - Example 1.png",
+    "assets/Module Type II - Example 2.png"
+  ],
+  "Module Type III": [
+    "assets/Module Type III - Example 1.png",
+    "assets/Module Type III - Example 2.png",
+    "assets/Module Type III - Example 3.png",
+    "assets/Module Type III - Example 4.png",
+    "assets/Module Type III - Example 5.png",
+    "assets/Module Type III - Example 6.png"
+  ],
+  "Module Type IV": [
+    "assets/Module Type IV - Example 1.png",
+    "assets/Module Type IV - Example 2.png",
+    "assets/Module Type IV - Example 3.png",
+    "assets/Module Type IV - Example 4.png"
+  ],
+  "Nanally": [
+    "assets/Nanally - S.png"
+  ],
+  "Psyche": [
+    "assets/Psyche.png"
   ],
   "Purple Arc Material": [
     "assets/Purple Arc Materal Example 1.png",
@@ -96,6 +206,12 @@
   "Rising Hunter Guide": [
     "assets/Rising Hunter Guide.png"
   ],
+  "S-Rank": [
+    "assets/S-Rank.png"
+  ],
+  "Sakiri": [
+    "assets/Sakiri - S.png"
+  ],
   "Senior Hunter Guide": [
     "assets/Senior Hunter Guide.png"
   ],
@@ -105,6 +221,9 @@
     "assets/Silver Ability Upgrade Example 3.png",
     "assets/Silver Ability Upgrade Example 4.png",
     "assets/Silver Ability Upgrade Example 5.png"
+  ],
+  "Skia": [
+    "assets/Skia - A.png"
   ],
   "XP": [
     "assets/XP.svg"

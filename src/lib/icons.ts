@@ -3,8 +3,28 @@
 // shown too — the generated icons.json already groups files that way, so this
 // just maps a material label to the right group key.
 import iconGroups from '../data/icons.json'
+import gameData from '../data/gameData.json'
 
 const groups = iconGroups as Record<string, string[]>
+const nameToCategory = (gameData as { nameToCategory?: Record<string, string> }).nameToCategory ?? {}
+
+// Each example-material category maps to its icon group. Ability-upgrade tiers
+// use Green/Blue/Purple wording now (#16) but reuse the Bronze/Silver/Gold art.
+const CATEGORY_ICON: Record<string, string> = {
+  anomalyHunt: 'Anomaly Hunt Material',
+  anomalyPilgrimage: 'Anomaly Pilgrimage Material',
+  abilityGreen: 'Bronze Ability Upgrade',
+  abilityBlue: 'Silver Ability Upgrade',
+  abilityPurple: 'Gold Ability Upgrade',
+  wdGreen: 'Green World Material',
+  wdBlue: 'Blue World Material',
+  wdPurple: 'Purple World Material',
+}
+const ABILITY_TIER_ICON: Record<string, string> = {
+  green: 'Bronze Ability Upgrade',
+  blue: 'Silver Ability Upgrade',
+  purple: 'Gold Ability Upgrade',
+}
 
 // Asset URL prefixed with Vite's base so it resolves on web and in Electron.
 const url = (rel: string) => `${import.meta.env.BASE_URL}${rel}`
@@ -13,16 +33,28 @@ const url = (rel: string) => `${import.meta.env.BASE_URL}${rel}`
 function resolveKey(name: string): string | null {
   const n = name.toLowerCase()
 
+  // In-game named example material (e.g. "Black Hat") -> its category icon.
+  const cat = nameToCategory[name] ?? nameToCategory[name.trim()]
+  if (cat && CATEGORY_ICON[cat]) return CATEGORY_ICON[cat]
+
+  // Cartridge/Module XP badge (distinct from the generic XP badge).
+  if (/\bxp\b/.test(n) && /cartridge|module|manhole|c\/m/.test(n)) return 'CM-XP'
+
   if (n.includes('beetle') || n === 'coins' || n === 'coin') return 'Beetle Coins'
   if (n.includes('anomaly hunt')) return 'Anomaly Hunt Material'
   if (n.includes('anomaly pilgrimage')) return 'Anomaly Pilgrimage Material'
+  if (n.includes('heterogeneous')) return 'Heterogeneous Unit'
+  if (n.includes('expansion core')) return 'Expansion Core'
 
   const color = (n.match(/green|blue|purple|gold|silver|bronze/) || [])[0]
   const cap = color ? color[0].toUpperCase() + color.slice(1) : ''
 
   if (n.includes('world')) return color ? `${cap} World Material` : null
   if (n.includes('arc')) return color ? `${cap} Arc Material` : null
-  if (n.includes('ability')) return color ? `${cap} Ability Upgrade` : null
+  if (n.includes('ability')) return color ? ABILITY_TIER_ICON[color] ?? null : null
+  if (n.includes('cartridge')) return 'Cartridge'
+  const mt = n.match(/type\s*(ii|iii|iv)\b/)
+  if (n.includes('module') && mt) return `Module Type ${mt[1].toUpperCase()}`
 
   // XP sources
   if (n.includes('rising')) return 'Rising Hunter Guide'

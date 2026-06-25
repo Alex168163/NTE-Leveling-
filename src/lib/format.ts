@@ -17,8 +17,8 @@ export function comma(n: number): string {
   return n.toLocaleString('en-US')
 }
 
-// Largest value any resource input accepts (100 million).
-export const MAX_INPUT = 100_000_000
+// Largest value any resource input accepts (999 million).
+export const MAX_INPUT = 999_000_000
 
 // Strip a leading "Colour / " from an XP-source label:
 // "Green / Rising Hunter Guide" -> "Rising Hunter Guide".

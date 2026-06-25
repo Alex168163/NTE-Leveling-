@@ -42,13 +42,20 @@ export function FullMaxTab() {
       mats: Object.values(arc.mats).map((r) => ({ name: r.label, qty: r.qty, iconName: r.iconName })),
     })
 
-    // A real character max-out: 1 Gold Cartridge + 8 Gold Modules, each → Lv 20.
+    // A real character max-out: 1 Gold Cartridge + a "filled" module set
+    // (1× Type IV + 4× Type III + 2× Type II), each → Lv 20.
     const goldCart = gameData.cartridges.find((c) => /gold/i.test(c.rarity))
-    const goldMod = gameData.modules.find((m) => /gold/i.test(m.rarity))
-    const cmXP = (goldCart?.xp ?? 0) + (goldMod?.xp ?? 0) * 8
-    const cmCoins = (goldCart?.coins ?? 0) + (goldMod?.coins ?? 0) * 8
+    let cmXP = goldCart?.xp ?? 0
+    let cmCoins = goldCart?.coins ?? 0
+    for (const [type, qty] of Object.entries(gameData.filledModuleSet)) {
+      const m = gameData.moduleTypes.find((mt) => mt.type === type)
+      if (m) {
+        cmXP += m.xp * qty
+        cmCoins += m.coins * qty
+      }
+    }
     out.push({
-      label: '1 Gold Cartridge + 8 Gold Modules → Lv 20',
+      label: '1 Gold Cartridge + filled modules (1× Type IV, 4× Type III, 2× Type II) → Lv 20',
       coins: cmCoins,
       xp: cmXP,
       xpLabel: 'Cartridge/Module XP',
@@ -124,7 +131,7 @@ export function FullMaxTab() {
             )}
             {l.xp != null && l.xp > 0 && (
               <div className="cost-row xp-row">
-                <IconStack name="XP" />
+                <IconStack name={/cartridge|module/i.test(l.xpLabel ?? '') ? 'Cartridge/Module XP' : 'XP'} />
                 <span className="cost-label">{l.xpLabel}</span>
                 <span className="cost-amount" title={comma(l.xp)}>{short(l.xp)}</span>
                 {l.xpSources && <XpEquivalent xp={l.xp} sources={l.xpSources} />}

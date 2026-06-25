@@ -44,6 +44,18 @@ export interface XpSource {
   xp: number
 }
 
+export interface ModuleType {
+  type: string // "Type II"
+  xp: number
+  coins: number
+}
+export interface RosterChar {
+  name: string
+  rank: 'S' | 'A' | null
+  // category key -> in-game material name (anomalyHunt, abilityGreen, wdBlue, ...)
+  materials: Record<string, string>
+}
+
 export interface GameData {
   ascensionCaps: { ascension: number; unlocksTo: number }[]
   characters: { leveling: LevelRow[]; ascension: CharAscRow[] }
@@ -53,6 +65,12 @@ export interface GameData {
   abilities: { perSkill: AbilityRow[]; passive1: AbilityRow[]; passive2: AbilityRow[] }
   lifeSkills: { material: string; amount: number }[]
   xpSources: { character: XpSource[]; arc: XpSource[]; cartridgeModule: XpSource[] }
+  // ---- from NTE_Update.md ----
+  moduleTypes: ModuleType[]
+  filledModuleSet: Record<string, number>
+  inGameNames: Record<string, string[]>
+  nameToCategory: Record<string, string>
+  roster: RosterChar[]
 }
 
 // A single material requirement carried through the calculators.

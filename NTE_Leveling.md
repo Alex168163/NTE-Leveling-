@@ -122,11 +122,11 @@ This document contains the info needed to build a calculator that tells you — 
 |----------|--------|
 | Anomaly Pilgrimage Material   | 8x  |
 | Purple World Drop Material     | 16x |
-| Gold Ability Upgrade Material  | 16x |
+| Purple Ability Upgrade Material  | 16x |
 | Blue World Drop Material        | 10x |
-| Silver Ability Upgrade Material | 10x |
+| Blue Ability Upgrade Material | 10x |
 | Green World Drop Material       | 10x |
-| Bronze Ability Upgrade Material | 10x |
+| Green Ability Upgrade Material | 10x |
 | Beetle Coin                     | 437k |
 
 ### Passive Skill 1
@@ -134,7 +134,7 @@ This document contains the info needed to build a calculator that tells you — 
 | Material | Amount |
 |----------|--------|
 | Anomaly Pilgrimage Material      | 1x  |
-| Silver Ability Upgrade Material  | 2x  |
+| Blue Ability Upgrade Material  | 2x  |
 | Beetle Coin                      | 30k |
 
 ### Passive Skill 2
@@ -142,7 +142,7 @@ This document contains the info needed to build a calculator that tells you — 
 | Material | Amount |
 |----------|--------|
 | Anomaly Pilgrimage Material      | 2x  |
-| Gold Ability Upgrade Material    | 1x  |
+| Purple Ability Upgrade Material    | 1x  |
 | Beetle Coin                      | 40k |
 
 ---

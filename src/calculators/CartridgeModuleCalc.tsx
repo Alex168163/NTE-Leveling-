@@ -1,18 +1,20 @@
-// Cartridges & Modules have no ascension — each item just maxes to Lv 20 by
-// rarity. This tab lets you plan how many of each item type to max and checks
-// it against your Manhole XP + Beetle Coins.
+// Cartridge & Module Leveling. No ascension — each maxes to Lv 20. Per the
+// update: only the Gold cartridge remains, and modules are split into Types
+// II/III/IV (each its own cost). Choose how many of each you need and check it
+// against your Manhole XP + Beetle Coins.
 import { useMemo } from 'react'
 import { gameData, xpFromSources } from '../lib/calc'
 import { parseInput, sanitizeResource, short, cleanName } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
+import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
 
 interface Item {
   key: string
-  type: string
-  rarity: string
+  label: string
+  icon: string
   xp: number
   coins: number
 }
@@ -20,9 +22,18 @@ interface Item {
 const COLORS = ['Green', 'Blue', 'Purple'] as const
 
 export function CartridgeModuleCalc() {
+  const gold = gameData.cartridges.find((c) => /gold/i.test(c.rarity))
   const items: Item[] = [
-    ...gameData.cartridges.map((c) => ({ key: `cart:${c.rarity}`, type: 'Cartridge', rarity: c.rarity, xp: c.xp, coins: c.coins })),
-    ...gameData.modules.map((m) => ({ key: `mod:${m.rarity}`, type: 'Module', rarity: m.rarity, xp: m.xp, coins: m.coins })),
+    ...(gold
+      ? [{ key: 'cart:Gold', label: 'Gold Cartridge', icon: 'Cartridge', xp: gold.xp, coins: gold.coins }]
+      : []),
+    ...gameData.moduleTypes.map((m) => ({
+      key: `mod:${m.type}`,
+      label: `Module ${m.type}`,
+      icon: `Module ${m.type}`,
+      xp: m.xp,
+      coins: m.coins,
+    })),
   ]
 
   const { values, set } = useResources()
@@ -53,6 +64,8 @@ export function CartridgeModuleCalc() {
 
   return (
     <div className="calc">
+      <CharacterBanner />
+
       <section className="panel inputs">
         <h3>Your resources</h3>
         <div className="input-grid">
@@ -104,14 +117,12 @@ export function CartridgeModuleCalc() {
                 it.xp ? Math.floor(xpPool / it.xp) : Infinity,
                 it.coins ? Math.floor(coinPool / it.coins) : Infinity,
               )
-              const manholeIcon =
-                it.rarity === 'Gold' ? 'Manhole Boss' : 'Manhole Crook'
               return (
                 <tr key={it.key}>
                   <td>
                     <span className="mat-cell">
-                      <IconStack name={manholeIcon} size={20} />
-                      {it.type} · {it.rarity}
+                      <IconStack name={it.icon} size={20} />
+                      {it.label}
                     </span>
                   </td>
                   <td title={String(it.xp)}>{short(it.xp)}</td>
@@ -131,13 +142,16 @@ export function CartridgeModuleCalc() {
             })}
           </tbody>
         </table>
-        <p className="footnote">*If you spent everything on that one item type.</p>
+        <p className="footnote">
+          *If you spent everything on that one item type. A “filled” module set is 1× Type IV + 4×
+          Type III + 2× Type II.
+        </p>
       </section>
 
       <section className="panel reach">
         <h3>Total for your plan</h3>
         <div className="cost-list">
-          <CostRow label="Cartridge/Module XP" amount={need.xp} iconName={src[0].source} have={xpPool} />
+          <CostRow label="Cartridge/Module XP" amount={need.xp} iconName="Cartridge/Module XP" have={xpPool} />
           <CostRow label="Beetle Coins" amount={need.coins} iconName="Beetle Coins" have={coinPool} />
         </div>
       </section>

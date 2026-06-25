@@ -10,7 +10,9 @@ import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
 import { Slider } from '../components/Slider'
 import { XpEquivalent } from '../components/XpEquivalent'
+import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
+import { SELECTED_KEY, displayLabel } from '../lib/characters'
 
 export interface MatInput {
   id: string
@@ -32,6 +34,7 @@ const CURRENT_OPTIONS = [1, 20, 30, 40, 50, 60, 70, 80] as const
 
 export function LevelCalculator({ config }: { config: LevelConfig }) {
   const { values, set } = useResources()
+  const char = values[SELECTED_KEY] ?? '' // selected character (for material names)
   const levels = config.steps.map((s) => s.to) // e.g. [20,30,...,80]
 
   // Current level — the level you're ALREADY at. Locks the slider's floor and
@@ -75,6 +78,8 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
 
   return (
     <div className="calc">
+      <CharacterBanner />
+
       {/* ---- Current level (slider floor) ---- */}
       <section className="panel level-set">
         <div className="level-set-head">
@@ -133,7 +138,7 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             {config.matInputs.map((m) => (
               <ResourceInput
                 key={m.id}
-                label={m.label}
+                label={displayLabel(m.id, m.label, char)}
                 iconName={m.iconName}
                 value={values[m.id] ?? ''}
                 onChange={(v) => set(m.id, v)}
@@ -179,7 +184,7 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
           {Object.values(totals.mats).map((r) => (
             <CostRow
               key={r.id}
-              label={r.label}
+              label={displayLabel(r.id, r.label, char)}
               amount={r.qty}
               iconName={r.iconName}
               have={budget.mats[r.id] ?? 0}
@@ -221,7 +226,7 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
                       {s.reqs.map((r) => (
                         <span key={r.id} className="mat-cell">
                           <IconStack name={r.iconName} size={20} />
-                          {r.qty}× {r.label}
+                          {r.qty}× {displayLabel(r.id, r.label, char)}
                         </span>
                       ))}
                     </span>
