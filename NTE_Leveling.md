@@ -114,9 +114,9 @@ This document contains the info needed to build a calculator that tells you — 
 
 > Put this in as a **fun fact** only — needs a progression checker since it takes no XP, so it won't be part of the calculator.
 
-### All 4 Combat Abilities — Base Attack · Redirect Skill · Ultimate · Support Skill (Max to 10)
+### Base Attack · Redirect Skill · Ultimate · Support Skill
 
-> This is the **combined total to max all four** combat abilities to Lv 10 — *not* a per-skill cost.
+> Per-skill cost to max one of these abilities to Lv 10. There are four such combat abilities.
 
 | Material | Amount |
 |----------|--------|

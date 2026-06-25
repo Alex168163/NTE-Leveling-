@@ -1,122 +1,155 @@
 // "Costs for all abilities Max to 10 + passive skills + life skills".
-// These take no XP, so per the spec this is a fun-fact tracker (not part of the
-// leveling calculators). The combat-ability cost is the COMBINED total to max
-// all four abilities — not a per-skill cost — so it's counted once. Enter how
-// much of each resource you have and it shows what's left.
+// These take no XP, so per the spec this is a fun-fact progression checker, not
+// part of the leveling calculators. The combat-ability cost is PER-SKILL (there
+// are four such abilities). Tick each skill you've already maxed, AND enter how
+// many of each material you have — the "still need" list subtracts both and
+// keeps tracking everything else.
 import { useMemo, useState } from 'react'
 import { gameData } from '../lib/calc'
 import { parseInput, sanitizeResource, short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
+import type { AbilityRow } from '../types'
 
-interface Req {
-  material: string
-  amount: number
+const COMBAT_SKILLS = ['Base Attack', 'Redirect Skill', 'Ultimate', 'Support Skill']
+
+interface Block {
+  id: string
+  title: string
+  rows: AbilityRow[]
 }
 
-function aggregate(rows: { material: string; amount: number }[]): Req[] {
-  const map: Record<string, number> = {}
-  const order: string[] = []
-  for (const r of rows) {
-    if (!(r.material in map)) order.push(r.material)
-    map[r.material] = (map[r.material] ?? 0) + r.amount
-  }
-  return order.map((material) => ({ material, amount: map[material] }))
-}
-
-function TrackerSection({
-  title,
-  note,
-  reqs,
+// A material-tracker row: needed amount, an input for what you own, and status.
+function TrackRow({
+  material,
+  needed,
   have,
   onHave,
 }: {
-  title: string
-  note?: string
-  reqs: Req[]
-  have: Record<string, string>
-  onHave: (key: string, val: string) => void
+  material: string
+  needed: number
+  have: string
+  onHave: (v: string) => void
 }) {
-  const done = reqs.filter((r) => parseInput(have[r.material] ?? '') >= r.amount).length
+  const owned = parseInput(have)
+  const left = Math.max(0, needed - owned)
+  const complete = left === 0
   return (
-    <section className="panel tracker">
-      <div className="tracker-head">
-        <h3>{title}</h3>
-        <span className={`tracker-count${done === reqs.length ? ' all' : ''}`}>
-          {done}/{reqs.length} done
-        </span>
-      </div>
-      {note && <p className="reach-note">{note}</p>}
-      <div className="cost-list">
-        {reqs.map((r) => {
-          const owned = parseInput(have[r.material] ?? '')
-          const remaining = Math.max(0, r.amount - owned)
-          const complete = remaining === 0
-          return (
-            <div className={`track-row${complete ? ' complete' : ''}`} key={r.material}>
-              <IconStack name={r.material} />
-              <span className="cost-label">{r.material}</span>
-              <input
-                className="track-input"
-                type="text"
-                inputMode="text"
-                placeholder="0"
-                title="How many you have. Accepts k/m (max 100m)."
-                value={have[r.material] ?? ''}
-                onChange={(e) => onHave(r.material, sanitizeResource(e.target.value))}
-                spellCheck={false}
-              />
-              <span className="track-need" title={comma(r.amount)}>
-                / {short(r.amount)}
-              </span>
-              <span className="track-status">
-                {complete ? '✓' : `need ${short(remaining)}`}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-    </section>
+    <div className={`track-row${complete ? ' complete' : ''}`}>
+      <IconStack name={material} />
+      <span className="cost-label">{material}</span>
+      <input
+        className="track-input"
+        type="text"
+        inputMode="text"
+        placeholder="0"
+        title="How many you have. Accepts k/m (max 100m)."
+        value={have}
+        onChange={(e) => onHave(sanitizeResource(e.target.value))}
+        spellCheck={false}
+      />
+      <span className="track-need" title={comma(needed)}>
+        / {short(needed)}
+      </span>
+      <span className="track-status">{complete ? '✓ done' : `need ${short(left)}`}</span>
+    </div>
   )
 }
 
 export function AbilitiesTab() {
   const { perSkill, passive1, passive2 } = gameData.abilities
 
-  // One combined requirement list: all 4 combat abilities + both passives.
-  const abilityReqs = useMemo(
-    () => aggregate([...perSkill, ...passive1, ...passive2]),
-    [perSkill, passive1, passive2],
-  )
-  const lifeReqs: Req[] = gameData.lifeSkills.map((l) => ({ material: l.material, amount: l.amount }))
+  const blocks: Block[] = [
+    ...COMBAT_SKILLS.map((name) => ({ id: name, title: `${name} → Lv 10`, rows: perSkill })),
+    { id: 'passive1', title: 'Passive Skill 1', rows: passive1 },
+    { id: 'passive2', title: 'Passive Skill 2', rows: passive2 },
+  ]
 
+  const [done, setDone] = useState<Record<string, boolean>>({})
   const [have, setHave] = useState<Record<string, string>>({})
-  const onHave = (key: string, val: string) => setHave((p) => ({ ...p, [key]: val }))
+  const onHave = (k: string, v: string) => setHave((p) => ({ ...p, [k]: v }))
+
+  // Materials still required across every skill NOT yet ticked.
+  const remaining = useMemo(() => {
+    const map: Record<string, number> = {}
+    const order: string[] = []
+    for (const b of blocks) {
+      if (done[b.id]) continue
+      for (const r of b.rows) {
+        if (!(r.material in map)) order.push(r.material)
+        map[r.material] = (map[r.material] ?? 0) + r.amount
+      }
+    }
+    return order.map((material) => ({ material, amount: map[material] }))
+  }, [done, blocks])
 
   return (
     <div className="calc">
       <section className="panel reach">
-        <h3>Progression tracker — abilities &amp; passives</h3>
+        <h3>Progression checker — abilities &amp; passives</h3>
         <p className="reach-note">
-          The combat-ability figures are the <strong>combined total to max all four</strong>{' '}
-          abilities (Base Attack · Redirect · Ultimate · Support) to Lv 10, plus Passive Skill 1 and
-          Passive Skill 2 on one character. Enter what you have — the tracker shows what's left.
+          Each combat ability costs the amounts below (there are four of them), plus the two passive
+          skills. Tick the skills you've already maxed, then in <strong>Still need</strong> enter how
+          many of each material you have and check them off — the rest keeps tracking.
         </p>
       </section>
 
-      <TrackerSection
-        title="All abilities + passives (one character)"
-        reqs={abilityReqs}
-        have={have}
-        onHave={onHave}
-      />
+      <div className="ability-grid">
+        {blocks.map((b) => (
+          <section key={b.id} className={`panel ability-card${done[b.id] ? ' done' : ''}`}>
+            <label className="ability-head">
+              <input
+                type="checkbox"
+                checked={!!done[b.id]}
+                onChange={(e) => setDone((p) => ({ ...p, [b.id]: e.target.checked }))}
+              />
+              <h4>{b.title}</h4>
+            </label>
+            <div className="cost-list">
+              {b.rows.map((r) => (
+                <div className="cost-row" key={r.material}>
+                  <IconStack name={r.material} />
+                  <span className="cost-label">{r.material}</span>
+                  <span className="cost-amount">{short(r.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
 
-      <TrackerSection
-        title="All life skills on one character"
-        note="A fun-fact goal — everything one character would spend to learn every life skill."
-        reqs={lifeReqs}
-        have={have}
-        onHave={onHave}
-      />
+      <section className="panel target">
+        <h3>Still need — add what you have &amp; check it off</h3>
+        <div className="cost-list">
+          {remaining.length === 0 ? (
+            <p className="reach-note good">Everything ticked — all abilities maxed! 🎉</p>
+          ) : (
+            remaining.map((r) => (
+              <TrackRow
+                key={r.material}
+                material={r.material}
+                needed={r.amount}
+                have={have[r.material] ?? ''}
+                onHave={(v) => onHave(r.material, v)}
+              />
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="panel breakdown">
+        <h3>All Life Skills on one character (fun fact)</h3>
+        <div className="cost-list">
+          {gameData.lifeSkills.map((l) => (
+            <TrackRow
+              key={l.material}
+              material={l.material}
+              needed={l.amount}
+              have={have[l.material] ?? ''}
+              onHave={(v) => onHave(l.material, v)}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

@@ -50,15 +50,18 @@ export function FullMaxTab() {
       mats: [],
     })
 
-    // Abilities. The combat-ability cost already covers all four skills (it is
-    // NOT per-skill), so each list is counted once.
+    // Abilities: the combat cost is PER-SKILL and there are four of them, plus
+    // the two passive skills.
     const { perSkill, passive1, passive2 } = gameData.abilities
-    const allAbilityRows = [...perSkill, ...passive1, ...passive2]
-    const abilityCoins = allAbilityRows
-      .filter((r) => /beetle/i.test(r.material))
-      .reduce((s, r) => s + r.amount, 0)
+    const abilityCoins =
+      perSkill.find((r) => /beetle/i.test(r.material))!.amount * 4 +
+      (passive1.find((r) => /beetle/i.test(r.material))?.amount ?? 0) +
+      (passive2.find((r) => /beetle/i.test(r.material))?.amount ?? 0)
     const abilityMats: Record<string, number> = {}
-    for (const r of allAbilityRows)
+    for (let i = 0; i < 4; i++)
+      for (const r of perSkill)
+        if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
+    for (const r of [...passive1, ...passive2])
       if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
     out.push({
       label: 'All 4 combat abilities → Lv 10 + both passive skills',
