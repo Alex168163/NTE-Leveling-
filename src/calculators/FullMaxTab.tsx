@@ -50,23 +50,34 @@ export function FullMaxTab() {
       mats: [],
     })
 
-    // Abilities: the combat cost is PER-SKILL and there are four of them, plus
-    // the two passive skills.
+    // Abilities: the combat cost is PER-SKILL and there are four of them. Show
+    // the all-4 cost as its own line, then the two passive skills separately.
     const { perSkill, passive1, passive2 } = gameData.abilities
-    const abilityCoins =
-      perSkill.find((r) => /beetle/i.test(r.material))!.amount * 4 +
-      (passive1.find((r) => /beetle/i.test(r.material))?.amount ?? 0) +
-      (passive2.find((r) => /beetle/i.test(r.material))?.amount ?? 0)
-    const abilityMats: Record<string, number> = {}
-    for (let i = 0; i < 4; i++)
-      for (const r of perSkill)
-        if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
-    for (const r of [...passive1, ...passive2])
-      if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
+    const beetle = (rows: typeof perSkill) =>
+      rows.find((r) => /beetle/i.test(r.material))?.amount ?? 0
+    const matsTimes = (rows: typeof perSkill, times: number) => {
+      const m: Record<string, number> = {}
+      for (const r of rows)
+        if (!/beetle/i.test(r.material)) m[r.material] = (m[r.material] ?? 0) + r.amount * times
+      return m
+    }
+
+    // All 4 combat abilities → Lv 10 (per-skill cost ×4).
+    const abilityMats = matsTimes(perSkill, 4)
     out.push({
-      label: 'All 4 combat abilities → Lv 10 + both passive skills',
-      coins: abilityCoins,
+      label: 'All 4 combat abilities → Lv 10 (Base Attack · Redirect · Ultimate · Support)',
+      coins: beetle(perSkill) * 4,
       mats: Object.entries(abilityMats).map(([name, qty]) => ({ name, qty, iconName: name })),
+    })
+
+    // Both passive skills.
+    const passiveMats = { ...matsTimes(passive1, 1) }
+    for (const [k, v] of Object.entries(matsTimes(passive2, 1)))
+      passiveMats[k] = (passiveMats[k] ?? 0) + v
+    out.push({
+      label: 'Both passive skills (1 & 2)',
+      coins: beetle(passive1) + beetle(passive2),
+      mats: Object.entries(passiveMats).map(([name, qty]) => ({ name, qty, iconName: name })),
     })
 
     out.push({
