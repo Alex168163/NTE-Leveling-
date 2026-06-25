@@ -36,9 +36,14 @@ function resolveKey(name: string): string | null {
   if (n.includes('boss')) return 'Manhole Boss'
   if (n.includes('fons')) return 'Fons'
 
-  // Direct key match fallback (e.g. exact group names)
+  // Direct key match (e.g. exact group names like "Dreamless Seed")
   const direct = Object.keys(groups).find((k) => k.toLowerCase() === n)
-  return direct ?? null
+  if (direct) return direct
+
+  // Generic XP fallback — use the green "XP" badge for anything XP-related
+  // that has no dedicated art.
+  if (/\bxp\b/.test(n) || n === 'xp') return 'XP'
+  return null
 }
 
 // Returns every matching icon URL for a material name (possibly empty, e.g.

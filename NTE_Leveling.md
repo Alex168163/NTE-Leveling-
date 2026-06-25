@@ -114,7 +114,9 @@ This document contains the info needed to build a calculator that tells you — 
 
 > Put this in as a **fun fact** only — needs a progression checker since it takes no XP, so it won't be part of the calculator.
 
-### Base Attack · Redirect Skill · Ultimate · Support Skill
+### All 4 Combat Abilities — Base Attack · Redirect Skill · Ultimate · Support Skill (Max to 10)
+
+> This is the **combined total to max all four** combat abilities to Lv 10 — *not* a per-skill cost.
 
 | Material | Amount |
 |----------|--------|
@@ -131,17 +133,17 @@ This document contains the info needed to build a calculator that tells you — 
 
 | Material | Amount |
 |----------|--------|
-| *Example:* Eternal Memory       | 1x  |
-| *Example:* Resonance of Faith   | 2x  |
-| Beetle Coin                     | 30k |
+| Anomaly Pilgrimage Material      | 1x  |
+| Silver Ability Upgrade Material  | 2x  |
+| Beetle Coin                      | 30k |
 
 ### Passive Skill 2
 
 | Material | Amount |
 |----------|--------|
-| *Example:* Eternal Memory       | 2x  |
-| *Example:* Heart-Racing Night   | 1x  |
-| Beetle Coin                     | 40k |
+| Anomaly Pilgrimage Material      | 2x  |
+| Purple Ability Upgrade Material  | 1x  |
+| Beetle Coin                      | 40k |
 
 ---
 

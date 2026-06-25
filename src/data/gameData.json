@@ -339,13 +339,13 @@
     ],
     "passive1": [
       {
-        "material": "Eternal Memory",
-        "isExample": true,
+        "material": "Anomaly Pilgrimage Material",
+        "isExample": false,
         "amount": 1
       },
       {
-        "material": "Resonance of Faith",
-        "isExample": true,
+        "material": "Silver Ability Upgrade Material",
+        "isExample": false,
         "amount": 2
       },
       {
@@ -356,13 +356,13 @@
     ],
     "passive2": [
       {
-        "material": "Eternal Memory",
-        "isExample": true,
+        "material": "Anomaly Pilgrimage Material",
+        "isExample": false,
         "amount": 2
       },
       {
-        "material": "Heart-Racing Night",
-        "isExample": true,
+        "material": "Purple Ability Upgrade Material",
+        "isExample": false,
         "amount": 1
       },
       {

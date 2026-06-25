@@ -8,6 +8,7 @@ import { parseInput, short } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
+import { Slider } from '../components/Slider'
 
 export interface MatInput {
   id: string
@@ -114,29 +115,10 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
           <h3>Cost to reach</h3>
           <div className="target-badge">Lv {target}</div>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={levels.length - 1}
-          step={1}
-          value={levels.indexOf(target)}
-          onChange={(e) => setTarget(levels[+e.target.value])}
-          className="slider"
-        />
-        <div className="slider-ticks">
-          {levels.map((l) => (
-            <button
-              key={l}
-              className={l === target ? 'tick active' : 'tick'}
-              onClick={() => setTarget(l)}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
+        <Slider levels={levels} value={target} onChange={setTarget} />
 
         <div className="cost-list">
-          <CostRow label={config.xpLabel} amount={totals.xp} iconName={config.xpSources[0].source} have={budget.xp} />
+          <CostRow label={config.xpLabel} amount={totals.xp} iconName="XP" have={budget.xp} />
           <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={budget.coins} />
           {Object.values(totals.mats).map((r) => (
             <CostRow

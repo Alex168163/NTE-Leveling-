@@ -4,21 +4,22 @@
    dark backdrop so calc content stays readable.
    ========================================================================= */
 :root {
-  --bg: #05080f;
-  --panel: rgba(10, 16, 30, 0.82);
-  --panel-2: rgba(14, 22, 40, 0.9);
-  --edge: rgba(0, 229, 255, 0.28);
-  --cyan: #19e6ff;
-  --magenta: #ff3df0;
-  --violet: #9b6bff;
-  --lime: #5cff8f;
-  --amber: #ffce4d;
-  --text: #e8f3ff;
-  --muted: #8aa0c2;
-  --short: #ff5d73;
-  --good: #5cff8f;
-  --radius: 14px;
-  --glow: 0 0 18px rgba(25, 230, 255, 0.25);
+  --bg: #070d1a;
+  --panel: rgba(24, 34, 58, 0.74);
+  --panel-2: rgba(28, 40, 68, 0.82);
+  --edge: rgba(70, 232, 255, 0.42);
+  --cyan: #38ecff;
+  --magenta: #ff5cf4;
+  --violet: #b48bff;
+  --lime: #76ffa6;
+  --amber: #ffd96b;
+  --text: #f2f8ff;
+  --muted: #b6cbe8;
+  --short: #ff6f84;
+  --good: #76ffa6;
+  --radius: 16px;
+  --glow: 0 0 22px rgba(56, 236, 255, 0.22);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
@@ -34,12 +35,23 @@ body,
 body {
   color: var(--text);
   background: var(--bg);
-  /* Background.jpg backsplash */
-  background-image: linear-gradient(rgba(3, 6, 14, 0.6), rgba(3, 6, 14, 0.82)),
+  /* Background.jpg backsplash — lighter overlay so the art stays vibrant */
+  background-image: linear-gradient(rgba(7, 12, 24, 0.42), rgba(7, 12, 24, 0.62)),
     url('/assets/Background.jpg');
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
+}
+
+/* Smooth, subtle transitions everywhere interactive */
+button,
+input,
+.tab,
+.panel,
+.track-row,
+.cost-row {
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    border-color 0.18s var(--ease), background-color 0.18s var(--ease), opacity 0.18s var(--ease);
 }
 
 .app {
@@ -260,32 +272,181 @@ body {
   border-radius: 999px;
   box-shadow: 0 0 14px rgba(25, 230, 255, 0.5);
 }
-.slider {
-  width: 100%;
-  accent-color: var(--magenta);
-  margin: 14px 0 6px;
+/* ---- custom animated slider ---- */
+.nslider {
+  margin: 26px 4px 18px;
+  outline: none;
 }
-.slider-ticks {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin-bottom: 14px;
-}
-.tick {
-  flex: 1;
-  font-size: 12px;
-  padding: 4px 0;
-  background: transparent;
+.nslider-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--edge);
-  color: var(--muted);
-  border-radius: 7px;
   cursor: pointer;
+  touch-action: none;
 }
-.tick.active {
-  color: var(--bg);
-  background: var(--cyan);
-  border-color: var(--cyan);
+.nslider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  box-shadow: 0 0 16px rgba(255, 92, 244, 0.45);
+  transition: width 0.32s var(--ease);
+}
+.nslider-dot {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background-color 0.3s var(--ease);
+}
+.nslider-dot.on {
+  background: #fff;
+}
+.nslider-thumb {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  transition: left 0.32s var(--ease);
+}
+.nslider-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff, var(--cyan) 70%);
+  border: 2px solid #fff;
+  box-shadow: 0 0 18px rgba(56, 236, 255, 0.8);
+}
+.nslider:focus .nslider-thumb::after,
+.nslider-track:active + .nslider-thumb::after {
+  box-shadow: 0 0 24px rgba(255, 92, 244, 0.9);
+}
+.nslider-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  background: var(--magenta);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(255, 92, 244, 0.6);
+  pointer-events: none;
+}
+.nslider-labels {
+  position: relative;
+  height: 22px;
+  margin-top: 12px;
+}
+.nslider-label {
+  position: absolute;
+  transform: translateX(-50%);
+  top: 0;
+  font-size: 12px;
+  padding: 2px 6px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 7px;
+}
+.nslider-label:hover {
+  color: var(--text);
+}
+.nslider-label.active {
+  color: var(--cyan);
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(56, 236, 255, 0.7);
+}
+
+/* ---- disclaimer ---- */
+.disclaimer {
+  margin-bottom: 18px;
+  padding: 11px 16px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #fff3d6;
+  background: linear-gradient(90deg, rgba(255, 206, 77, 0.16), rgba(255, 92, 244, 0.08));
+  border: 1px solid rgba(255, 206, 77, 0.45);
+  border-radius: var(--radius);
+}
+.disclaimer strong {
+  color: var(--amber);
+}
+
+/* ---- trackers (abilities tab) ---- */
+.tracker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tracker-count {
+  font-size: 12px;
   font-weight: 700;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--edge);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.tracker-count.all {
+  color: var(--bg);
+  background: var(--good);
+  border-color: var(--good);
+}
+.track-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+}
+.track-row.complete {
+  background: rgba(118, 255, 166, 0.12);
+  border: 1px solid rgba(118, 255, 166, 0.4);
+}
+.track-input {
+  width: 70px;
+  padding: 6px 8px;
+  text-align: right;
+  font-size: 14px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  outline: none;
+}
+.track-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 10px rgba(56, 236, 255, 0.35);
+}
+.track-need {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  min-width: 56px;
+}
+.track-status {
+  min-width: 84px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--short);
+}
+.track-row.complete .track-status {
+  color: var(--good);
 }
 
 /* ---- cost rows ---- */

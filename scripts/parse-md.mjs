@@ -187,7 +187,7 @@ writeFileSync(OUT_PATH, JSON.stringify(data, null, 2) + '\n')
 // "Materal" (a source typo) is normalised to "Material".
 function baseName(file) {
   return file
-    .replace(/\.png$/i, '')
+    .replace(/\.(png|svg)$/i, '')
     .replace(/\s*Example\s*\d*$/i, '') // "... Example 3" / "... Example"
     .replace(/\s+\d+$/i, '') // trailing bare number
     .replace(/Materal/gi, 'Material')
@@ -196,7 +196,7 @@ function baseName(file) {
 
 const groups = {}
 for (const file of readdirSync(ASSETS_DIR)) {
-  if (!/\.png$/i.test(file)) continue // skip Background.jpg etc.
+  if (!/\.(png|svg)$/i.test(file)) continue // skip Background.jpg etc.
   const key = baseName(file)
   ;(groups[key] ||= []).push(`assets/${file}`)
 }

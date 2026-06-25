@@ -41,6 +41,9 @@
   "Colorless Dye": [
     "assets/Colorless Dye.png"
   ],
+  "Dreamless Seed": [
+    "assets/Dreamless Seed.png"
+  ],
   "Elite Hunter Guide": [
     "assets/Elite Hunter Guide.png"
   ],
@@ -102,5 +105,8 @@
     "assets/Silver Ability Upgrade Example 3.png",
     "assets/Silver Ability Upgrade Example 4.png",
     "assets/Silver Ability Upgrade Example 5.png"
+  ],
+  "XP": [
+    "assets/XP.svg"
   ]
 }

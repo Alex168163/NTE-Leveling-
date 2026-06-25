@@ -34,6 +34,12 @@ export default function App() {
         <div className="logo-tag">Neverness&nbsp;To&nbsp;Everness · QOL tool</div>
       </header>
 
+      <div className="disclaimer">
+        <strong>Disclaimer:</strong> In-Game rounding lands some upgrades to inconsistent numbers,
+        some beetle coin calculations and XP calculations are rounded to the nearest thousand. This
+        means you might have a little extra left over even after using this calculator.
+      </div>
+
       <nav className="tabs">
         {TABS.map((t) => (
           <button
@@ -50,8 +56,7 @@ export default function App() {
       <main className="content">{tab.render()}</main>
 
       <footer className="app-footer">
-        Data parsed live from <code>NTE_Leveling.md</code> · &ldquo;coins&rdquo; = Beetle Coins ·
-        unofficial fan tool
+        This is an unoffical fan tool Made by Parkdevelopment
       </footer>
     </div>
   )

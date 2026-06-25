@@ -50,18 +50,18 @@ export function FullMaxTab() {
       mats: [],
     })
 
-    // Abilities: 4 combat skills + 2 passives.
+    // Abilities. The combat-ability cost already covers all four skills (it is
+    // NOT per-skill), so each list is counted once.
     const { perSkill, passive1, passive2 } = gameData.abilities
-    const abilityCoins =
-      perSkill.find((r) => /beetle/i.test(r.material))!.amount * 4 +
-      (passive1.find((r) => /beetle/i.test(r.material))?.amount ?? 0) +
-      (passive2.find((r) => /beetle/i.test(r.material))?.amount ?? 0)
+    const allAbilityRows = [...perSkill, ...passive1, ...passive2]
+    const abilityCoins = allAbilityRows
+      .filter((r) => /beetle/i.test(r.material))
+      .reduce((s, r) => s + r.amount, 0)
     const abilityMats: Record<string, number> = {}
-    for (let i = 0; i < 4; i++)
-      for (const r of perSkill)
-        if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
+    for (const r of allAbilityRows)
+      if (!/beetle/i.test(r.material)) abilityMats[r.material] = (abilityMats[r.material] ?? 0) + r.amount
     out.push({
-      label: 'All 4 combat abilities → Lv 10 + both passives',
+      label: 'All 4 combat abilities → Lv 10 + both passive skills',
       coins: abilityCoins,
       mats: Object.entries(abilityMats).map(([name, qty]) => ({ name, qty, iconName: name })),
     })
@@ -104,7 +104,8 @@ export function FullMaxTab() {
             )}
             {l.xp != null && l.xp > 0 && (
               <div className="cost-row">
-                <span className="cost-label" style={{ marginLeft: 34 }}>{l.xpLabel}</span>
+                <IconStack name="XP" />
+                <span className="cost-label">{l.xpLabel}</span>
                 <span className="cost-amount" title={comma(l.xp)}>{short(l.xp)}</span>
               </div>
             )}

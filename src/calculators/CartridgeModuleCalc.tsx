@@ -3,7 +3,7 @@
 // it against your Manhole XP + Beetle Coins.
 import { useMemo, useState } from 'react'
 import { gameData, xpFromSources } from '../lib/calc'
-import { parseInput, short } from '../lib/format'
+import { parseInput, sanitizeResource, short } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
@@ -115,7 +115,7 @@ export function CartridgeModuleCalc() {
                       inputMode="numeric"
                       placeholder="0"
                       value={want[it.key] ?? ''}
-                      onChange={(e) => setWant((p) => ({ ...p, [it.key]: e.target.value }))}
+                      onChange={(e) => setWant((p) => ({ ...p, [it.key]: sanitizeResource(e.target.value) }))}
                     />
                   </td>
                   <td className="muted">{Number.isFinite(affordable) ? affordable : '∞'}</td>
