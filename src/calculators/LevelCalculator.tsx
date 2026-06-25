@@ -9,6 +9,7 @@ import { ResourceInput } from '../components/ResourceInput'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
 import { Slider } from '../components/Slider'
+import { XpEquivalent } from '../components/XpEquivalent'
 
 export interface MatInput {
   id: string
@@ -118,7 +119,13 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
         <Slider levels={levels} value={target} onChange={setTarget} />
 
         <div className="cost-list">
-          <CostRow label={config.xpLabel} amount={totals.xp} iconName="XP" have={budget.xp} />
+          <CostRow
+            label={config.xpLabel}
+            amount={totals.xp}
+            iconName="XP"
+            have={budget.xp}
+            extra={<XpEquivalent xp={totals.xp} sources={config.xpSources} />}
+          />
           <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={budget.coins} />
           {Object.values(totals.mats).map((r) => (
             <CostRow

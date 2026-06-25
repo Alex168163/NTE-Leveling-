@@ -5,12 +5,15 @@ import { useMemo } from 'react'
 import { characterSteps, arcSteps, cumulativeCost, gameData } from '../lib/calc'
 import { short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
+import { XpEquivalent } from '../components/XpEquivalent'
+import type { XpSource } from '../types'
 
 interface Line {
   label: string
   coins: number
   xp?: number
   xpLabel?: string
+  xpSources?: XpSource[]
   mats: { name: string; qty: number; iconName: string }[]
 }
 
@@ -24,6 +27,7 @@ export function FullMaxTab() {
       coins: char.coins,
       xp: char.xp,
       xpLabel: 'Character XP',
+      xpSources: gameData.xpSources.character,
       mats: Object.values(char.mats).map((r) => ({ name: r.label, qty: r.qty, iconName: r.iconName })),
     })
 
@@ -33,6 +37,7 @@ export function FullMaxTab() {
       coins: arc.coins,
       xp: arc.xp,
       xpLabel: 'Arc XP',
+      xpSources: gameData.xpSources.arc,
       mats: Object.values(arc.mats).map((r) => ({ name: r.label, qty: r.qty, iconName: r.iconName })),
     })
 
@@ -47,6 +52,7 @@ export function FullMaxTab() {
       coins: cmCoins,
       xp: cmXP,
       xpLabel: 'Cartridge/Module XP',
+      xpSources: gameData.xpSources.cartridgeModule,
       mats: [],
     })
 
@@ -117,10 +123,11 @@ export function FullMaxTab() {
               </div>
             )}
             {l.xp != null && l.xp > 0 && (
-              <div className="cost-row">
+              <div className="cost-row xp-row">
                 <IconStack name="XP" />
                 <span className="cost-label">{l.xpLabel}</span>
                 <span className="cost-amount" title={comma(l.xp)}>{short(l.xp)}</span>
+                {l.xpSources && <XpEquivalent xp={l.xp} sources={l.xpSources} />}
               </div>
             )}
             {l.mats.map((m) => (

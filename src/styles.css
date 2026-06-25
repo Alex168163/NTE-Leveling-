@@ -71,6 +71,7 @@ input,
   padding-bottom: 16px;
   border-bottom: 1px solid var(--edge);
   margin-bottom: 18px;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 .logo {
   display: flex;
@@ -86,7 +87,7 @@ input,
 }
 .logo-sub {
   font-size: 15px;
-  color: var(--muted);
+  color: #d8e6fb;
   letter-spacing: 0.5px;
 }
 .logo-tag {
@@ -94,7 +95,6 @@ input,
   color: var(--cyan);
   text-transform: uppercase;
   letter-spacing: 2px;
-  opacity: 0.85;
 }
 
 /* ---- tabs ---- */
@@ -374,16 +374,36 @@ input,
 /* ---- disclaimer ---- */
 .disclaimer {
   margin-bottom: 18px;
-  padding: 11px 16px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: #fff3d6;
-  background: linear-gradient(90deg, rgba(255, 206, 77, 0.16), rgba(255, 92, 244, 0.08));
-  border: 1px solid rgba(255, 206, 77, 0.45);
+  padding: 13px 18px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #ffffff;
+  background: rgba(9, 13, 26, 0.92);
+  border: 1px solid rgba(255, 206, 77, 0.65);
+  border-left: 4px solid var(--amber);
   border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 .disclaimer strong {
   color: var(--amber);
+}
+
+/* ---- XP -> material conversion (next to the XP icon) ---- */
+.xp-equiv {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--lime);
+  white-space: nowrap;
+}
+.xp-equiv strong {
+  color: #fff;
+  font-weight: 800;
+}
+.cost-row {
+  flex-wrap: wrap;
 }
 
 /* ---- trackers (abilities tab) ---- */

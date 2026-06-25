@@ -142,7 +142,7 @@ This document contains the info needed to build a calculator that tells you — 
 | Material | Amount |
 |----------|--------|
 | Anomaly Pilgrimage Material      | 2x  |
-| Purple Ability Upgrade Material  | 1x  |
+| Gold Ability Upgrade Material    | 1x  |
 | Beetle Coin                      | 40k |
 
 ---
