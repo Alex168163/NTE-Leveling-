@@ -1,6 +1,7 @@
 // "1–80" tab — what everything maxed from 1 to 80 would cost, in one place.
-// Sums: one character 1->80, one arc 1->80, one of every cartridge & module
-// rarity, all four combat abilities + both passives, and all life skills.
+// Sums: one character 1->80, one arc 1->80, the cartridge + modules a character
+// actually equips (1 Gold Cartridge + 8 Gold Modules → Lv 20), all four combat
+// abilities, both passives, and all life skills.
 import { useMemo } from 'react'
 import { characterSteps, arcSteps, cumulativeCost, gameData } from '../lib/calc'
 import { short, comma } from '../lib/format'
@@ -41,14 +42,13 @@ export function FullMaxTab() {
       mats: Object.values(arc.mats).map((r) => ({ name: r.label, qty: r.qty, iconName: r.iconName })),
     })
 
-    const cmXP =
-      gameData.cartridges.reduce((s, c) => s + c.xp, 0) +
-      gameData.modules.reduce((s, m) => s + m.xp, 0)
-    const cmCoins =
-      gameData.cartridges.reduce((s, c) => s + c.coins, 0) +
-      gameData.modules.reduce((s, m) => s + m.coins, 0)
+    // A real character max-out: 1 Gold Cartridge + 8 Gold Modules, each → Lv 20.
+    const goldCart = gameData.cartridges.find((c) => /gold/i.test(c.rarity))
+    const goldMod = gameData.modules.find((m) => /gold/i.test(m.rarity))
+    const cmXP = (goldCart?.xp ?? 0) + (goldMod?.xp ?? 0) * 8
+    const cmCoins = (goldCart?.coins ?? 0) + (goldMod?.coins ?? 0) * 8
     out.push({
-      label: 'One of every Cartridge & Module rarity → Lv 20',
+      label: '1 Gold Cartridge + 8 Gold Modules → Lv 20',
       coins: cmCoins,
       xp: cmXP,
       xpLabel: 'Cartridge/Module XP',
