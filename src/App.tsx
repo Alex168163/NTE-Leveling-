@@ -69,7 +69,7 @@ export default function App() {
       <main className="content">{tab.render()}</main>
 
       <footer className="app-footer">
-        This is an unoffical fan tool Made by Parkdevelopment
+        This is an unofficial fan tool Made by Parkdevelopment
       </footer>
     </div>
   )
