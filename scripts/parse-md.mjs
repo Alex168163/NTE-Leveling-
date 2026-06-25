@@ -140,7 +140,7 @@ const cm = (needle) =>
 data.cartridges = cm('Cost to Upgrade Cartridges')
 data.modules = cm('Cost to Upgrade Modules')
 
-// Abilities (fun-fact / progression checker)
+// Abilities (progression checker)
 const abilityRows = (needle) =>
   tableAfter(needle).map((r) => ({
     material: r['Material'].replace(/^\*example:\*\s*/i, '').trim(),

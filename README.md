@@ -30,7 +30,7 @@ At dev/build time, `scripts/parse-md.mjs` parses that file's tables into:
 | **Characters** | Hunter-Guide XP + Beetle Coins + ascension mats → how high you can go, cost to a target level, per-ascension breakdown. |
 | **Arcs** | Same, with Dye XP and Arc/World-Drop materials. |
 | **Cartridges & Modules** | No ascensions — plan how many of each rarity to max to Lv 20 against your Manhole XP. |
-| **Abilities & Life Skills** | Fun-fact **progression checker** (these take no XP): tick what you've maxed, see what's left. |
+| **Abilities & Life Skills** | **Progression checker** (these take no XP): tick what you've maxed, see what's left. |
 | **1 → 80 Everything** | The grand total to max one of everything. |
 
 "Coins" always means **Beetle Coins**.

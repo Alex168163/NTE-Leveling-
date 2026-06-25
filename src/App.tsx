@@ -16,7 +16,7 @@ const TABS: Tab[] = [
   { id: 'characters', label: 'Characters', hint: 'Hunter Guides · XP & ascensions', render: () => <CharacterCalc /> },
   { id: 'arcs', label: 'Arcs', hint: 'Dyes · XP & ascensions', render: () => <ArcCalc /> },
   { id: 'cm', label: 'Cartridges & Modules', hint: 'Manholes · max to 20', render: () => <CartridgeModuleCalc /> },
-  { id: 'abilities', label: 'Abilities & Life Skills', hint: 'Fun fact · progression checker', render: () => <AbilitiesTab /> },
+  { id: 'abilities', label: 'Abilities & Life Skills', hint: 'Progression checker', render: () => <AbilitiesTab /> },
   { id: 'full', label: '1 → 80 Everything', hint: 'The grand total', render: () => <FullMaxTab /> },
 ]
 

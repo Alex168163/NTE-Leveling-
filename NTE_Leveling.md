@@ -18,7 +18,7 @@ This document contains the info needed to build a calculator that tells you — 
   - A **"Costs for all abilities Max to 10 + passive skills + life skills"** tab
   - A **"1–80"** tab showing what everything maxed would cost from 1–80
 - Each calculator tab should have an **input for every resource** needed for that tab (≈4-character max per resource input).
-- Use the supplied **background** as the backsplash, but make a custom backdrop for anything in calc / fun facts / Max Outs so it's more visible.
+- Use the supplied **background** as the backsplash, but make a custom backdrop for anything in calc / trackers / Max Outs so it's more visible.
 - Theme: fit the **NTE** look — city life, vibrant colors, super high-tech, almost **cyberpunk** vibes.
 
 ---
@@ -110,9 +110,9 @@ This document contains the info needed to build a calculator that tells you — 
 
 ---
 
-## Abilities — Max to 10 + Passive Skills (Fun Fact / Progression Checker)
+## Abilities — Max to 10 + Passive Skills (Progression Checker)
 
-> Put this in as a **fun fact** only — needs a progression checker since it takes no XP, so it won't be part of the calculator.
+> This takes no XP, so it's a **progression checker** rather than part of the leveling calculator.
 
 ### Base Attack · Redirect Skill · Ultimate · Support Skill
 
@@ -147,9 +147,9 @@ This document contains the info needed to build a calculator that tells you — 
 
 ---
 
-## All Life Skills on One Character (Fun Fact / Progression Checker)
+## All Life Skills on One Character (Progression Checker)
 
-> Put this in as a **fun fact** only — needs a progression checker since it takes no XP, so it won't be part of the calculator.
+> This takes no XP, so it's a **progression checker** rather than part of the leveling calculator.
 
 | Material | Amount |
 |----------|--------|

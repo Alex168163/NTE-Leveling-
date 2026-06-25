@@ -1,6 +1,6 @@
 // "Costs for all abilities Max to 10 + passive skills + life skills".
-// These take no XP, so per the spec this is a fun-fact progression checker, not
-// part of the leveling calculators. The combat-ability cost is PER-SKILL (there
+// These take no XP, so per the spec this is a progression checker, not part of
+// the leveling calculators. The combat-ability cost is PER-SKILL (there
 // are four such abilities). Tick each skill you've already maxed, AND enter how
 // many of each material you have — the "still need" list subtracts both and
 // keeps tracking everything else.
@@ -137,7 +137,7 @@ export function AbilitiesTab() {
       </section>
 
       <section className="panel breakdown">
-        <h3>All Life Skills on one character (fun fact)</h3>
+        <h3>All Life Skills on one character</h3>
         <div className="cost-list">
           {gameData.lifeSkills.map((l) => (
             <TrackRow
