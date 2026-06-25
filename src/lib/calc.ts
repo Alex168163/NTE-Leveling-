@@ -76,10 +76,12 @@ export interface Totals {
   mats: Record<string, Requirement> // id -> aggregated requirement
 }
 
-// Sum every step up to and including `targetLevel`.
-export function cumulativeCost(steps: Step[], targetLevel: number): Totals {
+// Sum every step in the range (fromLevel, targetLevel]. fromLevel lets an
+// already-levelled character/arc skip the brackets it has finished.
+export function cumulativeCost(steps: Step[], targetLevel: number, fromLevel = 1): Totals {
   const totals: Totals = { xp: 0, coins: 0, mats: {} }
   for (const s of steps) {
+    if (s.to <= fromLevel) continue
     if (s.to > targetLevel) break
     totals.xp += s.levelXP
     totals.coins += s.coins
@@ -105,13 +107,14 @@ export interface ReachResult {
   nextLevel: number | null // the level you couldn't reach (null if maxed)
 }
 
-export function maxReach(steps: Step[], budget: Budget): ReachResult {
+export function maxReach(steps: Step[], budget: Budget, fromLevel = 1): ReachResult {
   let xp = budget.xp
   let coins = budget.coins
   const mats: Record<string, number> = { ...budget.mats }
-  let level = 1 // you always start at level 1
+  let level = fromLevel // start from the level you're already at
 
   for (const s of steps) {
+    if (s.to <= fromLevel) continue // already past this bracket
     const short: string[] = []
     if (xp < s.levelXP) short.push('XP')
     if (coins < s.coins) short.push('Beetle Coins')

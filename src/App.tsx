@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useResources } from './state/resources'
+import { ResourcesTab } from './calculators/ResourcesTab'
 import { CharacterCalc } from './calculators/CharacterCalc'
 import { ArcCalc } from './calculators/ArcCalc'
 import { CartridgeModuleCalc } from './calculators/CartridgeModuleCalc'
@@ -14,6 +15,7 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
+  { id: 'resources', label: 'My Resources', hint: 'Fill once · fills everywhere', render: () => <ResourcesTab /> },
   { id: 'characters', label: 'Characters', hint: 'Hunter Guides · XP & ascensions', render: () => <CharacterCalc /> },
   { id: 'arcs', label: 'Arcs', hint: 'Dyes · XP & ascensions', render: () => <ArcCalc /> },
   { id: 'cm', label: 'Cartridges & Modules', hint: 'Manholes · max to 20', render: () => <CartridgeModuleCalc /> },

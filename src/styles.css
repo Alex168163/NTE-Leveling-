@@ -240,6 +240,16 @@ input,
   font-weight: 600;
 }
 
+/* ---- My Resources tab grid ---- */
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px 18px;
+}
+.res-grid .res-input {
+  padding: 4px 0;
+}
+
 /* ---- icons ---- */
 .icon-stack {
   display: inline-flex;
@@ -253,6 +263,52 @@ input,
 }
 .icon-stack img:last-child {
   margin-right: 6px;
+}
+
+/* ---- current-level (slider floor) ---- */
+.level-set-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.level-set-head h3 {
+  margin: 0;
+}
+.level-set-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+.level-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.level-pill {
+  min-width: 48px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.level-pill:hover {
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+}
+.level-pill.active {
+  color: var(--bg);
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 16px rgba(56, 236, 255, 0.55);
+}
+.break-table tr.done-step td {
+  opacity: 0.4;
+  text-decoration: line-through;
 }
 
 /* ---- reach panel ---- */

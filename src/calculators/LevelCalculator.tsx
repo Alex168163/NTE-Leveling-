@@ -27,14 +27,27 @@ export interface LevelConfig {
 }
 
 const COLORS = ['Green', 'Blue', 'Purple'] as const
+// Current-level choices: "New" (level 1) plus every 10 from 20 to 80.
+const CURRENT_OPTIONS = [1, 20, 30, 40, 50, 60, 70, 80] as const
 
 export function LevelCalculator({ config }: { config: LevelConfig }) {
   const { values, set } = useResources()
   const levels = config.steps.map((s) => s.to) // e.g. [20,30,...,80]
 
+  // Current level — the level you're ALREADY at. Locks the slider's floor and
+  // makes the cost cover only the levels you have left. "1" = a new (unlevelled)
+  // character/arc. Persisted per category.
+  const curKey = `ui:cur:${config.id}`
+  const currentLevel = Number(values[curKey] ?? 1) || 1
+  const setCurrentLevel = (lv: number) => set(curKey, String(lv))
+
+  const minTarget = Math.max(currentLevel, levels[0])
+  const sliderLevels = levels.filter((l) => l >= minTarget)
+
   const targetKey = `ui:target:${config.id}`
   const defaultTarget = levels[levels.length - 1]
-  const target = Number(values[targetKey] ?? defaultTarget) || defaultTarget
+  const rawTarget = Number(values[targetKey] ?? defaultTarget) || defaultTarget
+  const target = Math.min(levels[levels.length - 1], Math.max(rawTarget, minTarget))
   const setTarget = (lv: number) => set(targetKey, String(lv))
 
   const xpKey = (c: string) => `${config.xpKeyPrefix}:${c}`
@@ -48,14 +61,42 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, config])
 
-  const totals = useMemo(() => cumulativeCost(config.steps, target), [config.steps, target])
-  const reach = useMemo(() => maxReach(config.steps, budget), [config.steps, budget])
+  const totals = useMemo(
+    () => cumulativeCost(config.steps, target, currentLevel),
+    [config.steps, target, currentLevel],
+  )
+  const reach = useMemo(
+    () => maxReach(config.steps, budget, currentLevel),
+    [config.steps, budget, currentLevel],
+  )
 
   // Map color -> the XP source row (for icon + per-unit value).
   const sourceByColor = (c: string) => config.xpSources.find((s) => s.color === c)
 
   return (
     <div className="calc">
+      {/* ---- Current level (slider floor) ---- */}
+      <section className="panel level-set">
+        <div className="level-set-head">
+          <h3>Your current level</h3>
+          <span className="level-set-hint">
+            Already levelled? Set it here — the slider won't go below it and costs only count the
+            levels you have left.
+          </span>
+        </div>
+        <div className="level-pills">
+          {CURRENT_OPTIONS.map((l) => (
+            <button
+              key={l}
+              className={`level-pill${currentLevel === l ? ' active' : ''}`}
+              onClick={() => setCurrentLevel(l)}
+            >
+              {l === 1 ? 'New' : l}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* ---- Owned resources ---- */}
       <section className="panel inputs">
         <h3>Your resources</h3>
@@ -121,10 +162,10 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
       {/* ---- Target slider + cost ---- */}
       <section className="panel target">
         <div className="target-head">
-          <h3>Cost to reach</h3>
+          <h3>Cost {currentLevel > 1 ? `from Lv ${currentLevel} ` : ''}to reach</h3>
           <div className="target-badge">Lv {target}</div>
         </div>
-        <Slider levels={levels} value={target} onChange={setTarget} />
+        <Slider levels={sliderLevels} value={target} onChange={setTarget} />
 
         <div className="cost-list">
           <CostRow
@@ -160,8 +201,15 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             </tr>
           </thead>
           <tbody>
-            {config.steps.map((s) => (
-              <tr key={s.to} className={s.to <= target ? 'in-range' : ''}>
+            {config.steps.map((s) => {
+              const cls =
+                s.to <= currentLevel
+                  ? 'done-step'
+                  : s.to <= target
+                    ? 'in-range'
+                    : ''
+              return (
+              <tr key={s.to} className={cls}>
                 <td>Lv {s.to}</td>
                 <td title={String(s.levelXP)}>{short(s.levelXP)}</td>
                 <td>{short(s.coins)}</td>
@@ -180,7 +228,8 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
                   )}
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </section>
