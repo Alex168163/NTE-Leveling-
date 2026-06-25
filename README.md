@@ -7,6 +7,13 @@ costs to get there, ascensions included.
 
 Built as a web-feel app that also packages into a Windows **`.exe`** desktop window (Electron).
 
+## Download (Windows)
+
+**▶ [Download the installer](https://github.com/Alex168163/NTE-Leveling-/releases/latest)** — grab
+`NTE.Leveling.Calculator.Setup.x.y.z.exe` from the latest release and run it. The app isn't
+code-signed, so Windows SmartScreen may say *"Windows protected your PC"* → click **More info →
+Run anyway**. The installer lets you pick the folder and adds a Desktop shortcut.
+
 ---
 
 ## The markdown is the source of truth
@@ -54,13 +61,20 @@ npm run package:win    # portable desktop app -> release/NTE Leveling Calculator
 npm run dist           # full Windows installer (.exe) -> release/   (electron-builder)
 ```
 
-> **Note on `npm run dist`:** building the *installer* with electron-builder needs to
-> create symlinks while extracting its signing tools, which on Windows requires
-> **Developer Mode** (Settings → Privacy & security → For developers) **or an
-> elevated/admin terminal**. If you hit `Cannot create symbolic link : A required
-> privilege is not held`, enable Developer Mode and retry — or just use
-> `npm run package:win`, which produces a ready-to-run portable `.exe` with no
-> signing toolchain.
+`npm run dist` produces the shareable **installer** (`release/NTE Leveling Calculator Setup
+x.y.z.exe`), which is what's attached to GitHub Releases.
+
+> **If `npm run dist` fails with `Cannot create symbolic link : A required privilege is not
+> held`:** electron-builder extracts a `winCodeSign` bundle that contains macOS symlinks, and
+> creating symlinks on Windows needs **Developer Mode** (Settings → Privacy & security → For
+> developers) or an admin terminal. Two ways through without elevating:
+> 1. Pre-extract the bundle once (the macOS symlinks fail harmlessly, the Windows tools we
+>    need extract fine), then re-run `npm run dist`:
+>    ```bash
+>    cd "%LOCALAPPDATA%\electron-builder\Cache\winCodeSign"
+>    7za x winCodeSign-2.6.0.7z -o"winCodeSign-2.6.0" -y   # ignore the 2 .dylib symlink errors
+>    ```
+> 2. Or just run `npm run package:win` for a portable (no-installer) build.
 
 ## Project layout
 
