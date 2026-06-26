@@ -27,13 +27,32 @@ const TABS: Tab[] = [
   { id: 'full', label: '1 → 80 Everything', hint: 'The grand total', render: () => <FullMaxTab /> },
 ]
 
+const VIDEO_URL = `${import.meta.env.BASE_URL}assets/Rick Roll.mp4`
+
 export default function App() {
   const [active, setActive] = useState(TABS[0].id)
   const tab = TABS.find((t) => t.id === active)!
   const { reset } = useResources()
+  const [playing, setPlaying] = useState(false)
 
   return (
     <div className="app">
+      <button className="easter-egg" onClick={() => setPlaying(true)}>
+        Esper Zero and Mint Kissing Here!
+      </button>
+
+      {playing && (
+        <div className="rickroll-overlay">
+          <video
+            className="rickroll-video"
+            src={VIDEO_URL}
+            autoPlay
+            onEnded={() => setPlaying(false)}
+            onError={() => setPlaying(false)}
+          />
+        </div>
+      )}
+
       <header className="app-header">
         <div className="logo">
           <span className="logo-n">NTE</span>
