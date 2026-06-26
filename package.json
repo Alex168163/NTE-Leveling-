@@ -1,7 +1,7 @@
 {
   "name": "nte-leveling",
   "productName": "NTE Leveling Calculator",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Quality-of-life level calculator & resource checker for Neverness To Everness",
   "author": "Alex168163",
   "license": "MIT",
@@ -51,6 +51,12 @@
       "target": [
         {
           "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
           "arch": [
             "x64"
           ]

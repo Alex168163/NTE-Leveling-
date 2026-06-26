@@ -9,10 +9,21 @@ Built as a web-feel app that also packages into a Windows **`.exe`** desktop win
 
 ## Download (Windows)
 
-**▶ [Download the installer](https://github.com/Alex168163/NTE-Leveling-/releases/latest)** — grab
-`NTE.Leveling.Calculator.Setup.x.y.z.exe` from the latest release and run it. The app isn't
-code-signed, so Windows SmartScreen may say *"Windows protected your PC"* → click **More info →
-Run anyway**. The installer lets you pick the folder and adds a Desktop shortcut.
+From the **[latest release](https://github.com/Alex168163/NTE-Leveling-/releases/latest)** grab
+either:
+- **`...Setup.x.y.z.exe`** — installer (pick a folder, adds a Desktop shortcut), or
+- **`...x.y.z-win.zip`** — portable; unzip anywhere and run `NTE Leveling Calculator.exe` inside.
+
+### If Windows/your browser blocks it
+The app isn't code-signed, so it has no SmartScreen reputation yet — it's safe, just unrecognised.
+1. **Browser** ("isn't commonly downloaded / may be dangerous"): on the download, click the **⋯** or
+   arrow → **Keep** / **Keep anyway**.
+2. **Best step — remove the "Mark of the Web":** right-click the downloaded file → **Properties** →
+   tick **Unblock** (bottom-right) → **OK**. (For the zip, unblock the **zip** before extracting.)
+   PowerShell equivalent: `Unblock-File "<path to file>"`.
+3. **On first run** ("Windows protected your PC"): click **More info → Run anyway**.
+
+These warnings also fade over time as more people run it.
 
 ---
 

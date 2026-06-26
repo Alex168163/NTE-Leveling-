@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useResources } from './state/resources'
 import { ResourcesTab } from './calculators/ResourcesTab'
 import { MyCharactersTab } from './calculators/MyCharactersTab'
@@ -36,6 +36,18 @@ export default function App() {
   const [playing, setPlaying] = useState(false)
   const eggSeen = values['egg:seen'] === '1'
 
+  // Secret: click the NTE logo 20× within 15s to bring the easter-egg button back.
+  const logoClicks = useRef<number[]>([])
+  const onLogoClick = () => {
+    const now = Date.now()
+    logoClicks.current = logoClicks.current.filter((t) => now - t < 15000)
+    logoClicks.current.push(now)
+    if (logoClicks.current.length >= 20) {
+      set('egg:seen', '') // bring the button back
+      logoClicks.current = []
+    }
+  }
+
   return (
     <div className="app">
       {!eggSeen && (
@@ -64,7 +76,7 @@ export default function App() {
 
       <header className="app-header">
         <div className="logo">
-          <span className="logo-n">NTE</span>
+          <span className="logo-n" onClick={onLogoClick}>NTE</span>
           <span className="logo-sub">Leveling Calculator &amp; Resource Checker</span>
         </div>
         <div className="header-right">
