@@ -830,5 +830,158 @@
         "wdPurple": "Transcendent Delusions"
       }
     }
+  ],
+  "abilityLevels": [
+    {
+      "level": 2,
+      "reqAscension": 2,
+      "mats": [
+        {
+          "cat": "abilityGreen",
+          "qty": 2
+        },
+        {
+          "cat": "wdGreen",
+          "qty": 2
+        }
+      ],
+      "coins": 2000
+    },
+    {
+      "level": 3,
+      "reqAscension": 2,
+      "mats": [
+        {
+          "cat": "abilityGreen",
+          "qty": 3
+        },
+        {
+          "cat": "wdGreen",
+          "qty": 3
+        }
+      ],
+      "coins": 5000
+    },
+    {
+      "level": 4,
+      "reqAscension": 2,
+      "mats": [
+        {
+          "cat": "abilityBlue",
+          "qty": 5
+        },
+        {
+          "cat": "wdBlue",
+          "qty": 5
+        }
+      ],
+      "coins": 10000
+    },
+    {
+      "level": 5,
+      "reqAscension": 4,
+      "mats": [
+        {
+          "cat": "abilityBlue",
+          "qty": 2
+        },
+        {
+          "cat": "wdBlue",
+          "qty": 2
+        }
+      ],
+      "coins": 20000
+    },
+    {
+      "level": 6,
+      "reqAscension": 4,
+      "mats": [
+        {
+          "cat": "abilityBlue",
+          "qty": 3
+        },
+        {
+          "cat": "wdBlue",
+          "qty": 3
+        }
+      ],
+      "coins": 40000
+    },
+    {
+      "level": 7,
+      "reqAscension": 5,
+      "mats": [
+        {
+          "cat": "abilityBlue",
+          "qty": 5
+        },
+        {
+          "cat": "wdBlue",
+          "qty": 5
+        },
+        {
+          "cat": "anomalyPilgrimage",
+          "qty": 1
+        }
+      ],
+      "coins": 60000
+    },
+    {
+      "level": 8,
+      "reqAscension": 5,
+      "mats": [
+        {
+          "cat": "abilityPurple",
+          "qty": 3
+        },
+        {
+          "cat": "wdPurple",
+          "qty": 3
+        },
+        {
+          "cat": "anomalyPilgrimage",
+          "qty": 1
+        }
+      ],
+      "coins": 80000
+    },
+    {
+      "level": 9,
+      "reqAscension": 6,
+      "mats": [
+        {
+          "cat": "abilityPurple",
+          "qty": 5
+        },
+        {
+          "cat": "wdPurple",
+          "qty": 5
+        },
+        {
+          "cat": "anomalyPilgrimage",
+          "qty": 2
+        }
+      ],
+      "coins": 100000
+    },
+    {
+      "level": 10,
+      "reqAscension": 6,
+      "mats": [
+        {
+          "cat": "abilityPurple",
+          "qty": 8
+        },
+        {
+          "cat": "wdPurple",
+          "qty": 8
+        },
+        {
+          "cat": "anomalyPilgrimage",
+          "qty": 4
+        }
+      ],
+      "coins": 120000
+    }
   ]
 }

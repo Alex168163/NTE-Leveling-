@@ -9,7 +9,13 @@ import {
   cLevelKey,
   LEVEL_OPTIONS,
   parseCharLevel,
+  cAscKey,
+  charAscension,
+  maxAscensionAt,
+  ascensionForLevel,
 } from '../lib/characters'
+
+const stars = (asc: number) => '★'.repeat(asc) + '☆'.repeat(6 - asc)
 import { IconStack } from '../components/IconStack'
 import { useResources } from '../state/resources'
 
@@ -58,6 +64,11 @@ export function MyCharactersTab() {
     <div className="calc">
       <section className="panel reach">
         <h3>My Characters</h3>
+        <div className="disclaimer">
+          Please set all your character levels, Ascension levels, and Ability levels to get accurate
+          info on the other tabs. (Ability level is set on the <strong>Ability &amp; Life Skill
+          Leveling</strong> tab.)
+        </div>
         <p className="reach-note">
           Pick the character you're working on — the leveling tabs will show that character's
           specific materials. Choose <strong>Unreleased / No Character</strong> to use the generic
@@ -106,7 +117,12 @@ export function MyCharactersTab() {
           {list.map((c) => {
             const lvlRaw = values[cLevelKey(c.name)] ?? ''
             const lvl = parseCharLevel(lvlRaw)
-            const badge = lvlRaw === 'none' ? "Don't own" : lvl != null ? `Lv ${lvl}` : 'Set level'
+            const owned = lvl != null
+            const asc = owned ? charAscension(values[cAscKey(c.name)], lvl) : 0
+            const ascOptions: number[] = []
+            if (owned && lvl >= 20)
+              for (let a = ascensionForLevel(lvl); a <= maxAscensionAt(lvl); a++) ascOptions.push(a)
+            const badge = lvlRaw === 'none' ? "Don't own" : owned ? `Lv ${lvl}` : 'Set level'
             return (
               <div key={c.name} className={`char-card${selected === c.name ? ' active' : ''}`}>
                 {c.rank && <span className={`char-rank r-${c.rank}`}>{c.rank}</span>}
@@ -116,8 +132,9 @@ export function MyCharactersTab() {
                   </div>
                   <div className="char-name">{c.name}</div>
                 </button>
-                <div className={`char-level-badge${lvlRaw === 'none' ? ' dont-own' : lvl != null ? ' set' : ''}`}>
+                <div className={`char-level-badge${lvlRaw === 'none' ? ' dont-own' : owned ? ' set' : ''}`}>
                   {badge}
+                  {owned && lvl >= 20 && <span className="char-stars" title={`Ascension ${asc}`}>{stars(asc)}</span>}
                 </div>
                 <select
                   className="char-level-select"
@@ -133,6 +150,22 @@ export function MyCharactersTab() {
                     </option>
                   ))}
                 </select>
+
+                {owned && lvl >= 20 && ascOptions.length > 1 && (
+                  <select
+                    className="char-level-select"
+                    value={String(asc)}
+                    onChange={(e) => set(cAscKey(c.name), e.target.value)}
+                    title="Current ascension (one ahead = paid but not levelled yet)"
+                  >
+                    {ascOptions.map((a) => (
+                      <option key={a} value={a}>
+                        Ascension {a}
+                        {a > ascensionForLevel(lvl) ? ' (one ahead)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             )
           })}

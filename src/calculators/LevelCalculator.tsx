@@ -19,6 +19,9 @@ import {
   cLevelKey,
   parseCharLevel,
   ascDoneKey,
+  cAscKey,
+  charAscension,
+  ascensionForLevel,
 } from '../lib/characters'
 
 export interface MatInput {
@@ -56,11 +59,16 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
   const setCurrentLevel = (lv: number) => set(curKey, String(lv))
 
   // "Ascension already done" for the current bracket (currentLevel -> +10).
+  // Character tab derives this from the character's ascension setting (one ahead,
+  // set on My Characters); the Arc tab keeps a manual checkbox.
   const hasAscension = currentLevel >= 20 && currentLevel <= 70
-  const who = config.usesCharacterLevel ? char : ''
-  const ascKey = ascDoneKey(config.id, who, currentLevel)
-  const ascChecked = hasAscension && values[ascKey] === '1'
-  const ascDoneLevel = ascChecked ? currentLevel : null
+  const fromCharAsc = !!config.usesCharacterLevel && !!char
+  const ascKey = ascDoneKey(config.id, char, currentLevel)
+  const ascChecked = fromCharAsc
+    ? charAscension(values[cAscKey(char)], currentLevel) > ascensionForLevel(currentLevel)
+    : hasAscension && values[ascKey] === '1'
+  const ascDoneLevel = ascChecked && hasAscension ? currentLevel : null
+  const showAscCheckbox = hasAscension && !fromCharAsc
 
   const minTarget = Math.max(currentLevel, levels[0])
   const sliderLevels = levels.filter((l) => l >= minTarget)
@@ -153,7 +161,7 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             </button>
           ))}
         </div>
-        {hasAscension && (
+        {showAscCheckbox && (
           <label className="asc-done">
             <input
               type="checkbox"
@@ -166,6 +174,12 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
               from the cost.
             </span>
           </label>
+        )}
+        {fromCharAsc && hasAscension && ascChecked && (
+          <p className="reach-note good">
+            ✓ {char} is one ascension ahead — the Lv {currentLevel}→{currentLevel + 10} ascension cost
+            is excluded (set on My Characters).
+          </p>
         )}
       </section>
 

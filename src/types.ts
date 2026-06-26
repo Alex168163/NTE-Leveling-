@@ -72,6 +72,16 @@ export interface GameData {
   nameToCategory: Record<string, string>
   materialIcon: Record<string, string>
   roster: RosterChar[]
+  abilityLevels: AbilityLevel[]
+}
+
+// One ability-upgrade level (per ability). Materials are category keys that map
+// to the selected character's specific named materials. Coins are fixed.
+export interface AbilityLevel {
+  level: number
+  reqAscension: number
+  mats: { cat: string; qty: number }[]
+  coins: number
 }
 
 // A single material requirement carried through the calculators.

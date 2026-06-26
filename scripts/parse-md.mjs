@@ -14,13 +14,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const MD_PATH = join(ROOT, 'NTE_Leveling.md')
 const UPD_PATH = join(ROOT, 'NTE Update', 'NTE_Update.md')
+const ABILITY_PATH = join(ROOT, 'Ability_Changes_Update.md')
 const OUT_PATH = join(ROOT, 'src', 'data', 'gameData.json')
 const ICONS_PATH = join(ROOT, 'src', 'data', 'icons.json')
 const ASSETS_DIR = join(ROOT, 'public', 'assets')
 
-// Two sources of truth: the base reference and the update. Both are parsed.
+// Sources of truth: the base reference, the update, and the ability changes.
 const md = readFileSync(MD_PATH, 'utf8')
 const upd = readFileSync(UPD_PATH, 'utf8')
+const abilityMd = readFileSync(ABILITY_PATH, 'utf8')
 
 // --- number parsing -------------------------------------------------------
 // "103k" -> 103000, "1.6m" -> 1600000, "26,000" -> 26000, "—"/"-" -> 0
@@ -291,6 +293,42 @@ for (const f of readdirSync(ASSETS_DIR)) {
 data.roster = Object.keys(charMats)
   .sort()
   .map((name) => ({ name, rank: rankByName[name] || null, materials: charMats[name] }))
+
+// ===========================================================================
+// Ability_Changes_Update.md — per-ability-LEVEL upgrade costs (Lv 2..10).
+// The sample table uses Sakiri's specific materials; we convert each to its
+// category key (abilityGreen, wdBlue, anomalyPilgrimage, ...) so it generalises
+// to every character. Beetle Coins are fixed across all characters.
+// ===========================================================================
+function parseAbilityMaterials(cell) {
+  const mats = []
+  let coins = 0
+  for (const raw of String(cell).split('·')) {
+    const p = raw.trim()
+    if (!p) continue
+    const m = p.match(/^(.+?)\s*[×x]\s*([\d.,]+)$/i)
+    if (!m) continue
+    const name = m[1].trim()
+    const qty = num(m[2])
+    if (/beetle/i.test(name)) {
+      coins = qty
+      continue
+    }
+    const cat = nameToCategory[name]
+    if (cat) mats.push({ cat, qty })
+  }
+  return { mats, coins }
+}
+
+data.abilityLevels = tableAfter('Upgrade Costs', abilityMd).map((r) => {
+  const { mats, coins } = parseAbilityMaterials(r['Materials'])
+  return {
+    level: Number((r['Level'].match(/\d+/) || [0])[0]),
+    reqAscension: Number((r['Required Ascension'].match(/\d+/) || [0])[0]),
+    mats,
+    coins,
+  }
+})
 
 writeFileSync(OUT_PATH, JSON.stringify(data, null, 2) + '\n')
 

@@ -1,154 +1,228 @@
-// "Costs for all abilities Max to 10 + passive skills + life skills".
-// These take no XP, so per the spec this is a progression checker, not part of
-// the leveling calculators. The combat-ability cost is PER-SKILL (there
-// are four such abilities). Tick each skill you've already maxed, AND enter how
-// many of each material you have — the "still need" list subtracts both and
-// keeps tracking everything else.
+// Ability & Life Skill Leveling. The combat-ability cost is now PER LEVEL
+// (Ability_Changes_Update.md): pick the selected character's current ability
+// level (from My Characters) and slide to a target — capped by ascension — to
+// see the materials (this character's specific ones) and fixed coins to bring
+// all 4 abilities there. Passive skills and life skills stay as trackers.
 import { useMemo } from 'react'
 import { gameData } from '../lib/calc'
-import { parseInput, sanitizeResource, short, comma } from '../lib/format'
+import { parseInput, short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
+import { CostRow } from '../components/CostRow'
 import { CharacterBanner } from '../components/CharacterBanner'
+import { Slider } from '../components/Slider'
 import { useResources } from '../state/resources'
 import { resourceKeyForMaterial } from '../lib/resourceKey'
-import { SELECTED_KEY, displayLabel, effectiveResourceKey } from '../lib/characters'
-import type { AbilityRow } from '../types'
+import {
+  SELECTED_KEY,
+  getCharacter,
+  displayLabel,
+  effectiveResourceKey,
+  cLevelKey,
+  cAbilityKey,
+  cAscKey,
+  parseCharLevel,
+  charAscension,
+  maxAbilityLevel,
+  ABILITY_LEVELS,
+  CATEGORY_TO_KEY,
+} from '../lib/characters'
 
-const COMBAT_SKILLS = ['Base Attack', 'Redirect Skill', 'Ultimate', 'Support Skill']
-
-interface Block {
-  id: string
-  title: string
-  rows: AbilityRow[]
+const RATE: Record<string, number> = { Green: 1, Blue: 3, Purple: 9 }
+// category -> [substitute pool key | null, tier]
+const CAT_FILL: Record<string, [string | null, string]> = {
+  abilityGreen: ['expansionCore', 'Green'],
+  abilityBlue: ['expansionCore', 'Blue'],
+  abilityPurple: ['expansionCore', 'Purple'],
+  wdGreen: ['heterogeneousUnit', 'Green'],
+  wdBlue: ['heterogeneousUnit', 'Blue'],
+  wdPurple: ['heterogeneousUnit', 'Purple'],
 }
 
-// A material-tracker row: needed amount, an input for what you own, and status.
+// A small manual tracker row (passives / life skills).
 function TrackRow({
-  material,
   display,
   needed,
   have,
   onHave,
 }: {
-  material: string
-  display?: string
+  display: string
   needed: number
   have: string
   onHave: (v: string) => void
 }) {
   const owned = parseInput(have)
   const left = Math.max(0, needed - owned)
-  const complete = left === 0
   return (
-    <div className={`track-row${complete ? ' complete' : ''}`}>
-      <IconStack name={display ?? material} />
-      <span className="cost-label">{display ?? material}</span>
+    <div className={`track-row${left === 0 ? ' complete' : ''}`}>
+      <IconStack name={display} />
+      <span className="cost-label">{display}</span>
       <input
         className="track-input"
         type="text"
-        inputMode="text"
         placeholder="0"
-        title="How many you have. Accepts k/m (max 999m)."
         value={have}
-        onChange={(e) => onHave(sanitizeResource(e.target.value))}
+        onChange={(e) => onHave(e.target.value)}
         spellCheck={false}
       />
       <span className="track-need" title={comma(needed)}>
         / {short(needed)}
       </span>
-      <span className="track-status">{complete ? '✓ done' : `need ${short(left)}`}</span>
+      <span className="track-status">{left === 0 ? '✓ done' : `need ${short(left)}`}</span>
     </div>
   )
 }
 
 export function AbilitiesTab() {
-  const { perSkill, passive1, passive2 } = gameData.abilities
-
-  const blocks: Block[] = [
-    ...COMBAT_SKILLS.map((name) => ({ id: name, title: `${name} → Lv 10`, rows: perSkill })),
-    { id: 'passive1', title: 'Passive Skill 1', rows: passive1 },
-    { id: 'passive2', title: 'Passive Skill 2', rows: passive2 },
-  ]
-
   const { values, set } = useResources()
   const char = values[SELECTED_KEY] ?? ''
-  const isDone = (id: string) => values[`adone:${id}`] === '1'
-  const setDoneFlag = (id: string, on: boolean) => set(`adone:${id}`, on ? '1' : '')
-  // Effective store key (character-specific pool when one is selected).
-  const keyFor = (material: string) => effectiveResourceKey(resourceKeyForMaterial(material), char)
-  const haveOf = (material: string) => values[keyFor(material)] ?? ''
-  const setHaveOf = (material: string, v: string) => set(keyFor(material), v)
-  // Character-specific display name for a generic material (#5).
-  const label = (material: string) => displayLabel(resourceKeyForMaterial(material), material, char)
+  const ch = getCharacter(char)
+  const lvl = ch ? parseCharLevel(values[cLevelKey(char)]) : null
+  const owned = !!ch && lvl != null
+  const asc = owned ? charAscension(values[cAscKey(char)], lvl as number) : 0
+  const maxTarget = maxAbilityLevel(asc)
+  const curAbility = owned
+    ? Math.min(maxTarget, Math.max(1, Number(values[cAbilityKey(char)] ?? 1) || 1))
+    : 1
 
-  // Materials still required across every skill NOT yet ticked.
-  const remaining = useMemo(() => {
-    const map: Record<string, number> = {}
-    const order: string[] = []
-    for (const b of blocks) {
-      if (isDone(b.id)) continue
-      for (const r of b.rows) {
-        if (!(r.material in map)) order.push(r.material)
-        map[r.material] = (map[r.material] ?? 0) + r.amount
-      }
+  const levels: number[] = []
+  for (let l = curAbility; l <= maxTarget; l++) levels.push(l)
+  const targetKey = 'ui:abtarget'
+  const target = Math.min(
+    maxTarget,
+    Math.max(curAbility, Number(values[targetKey] ?? maxTarget) || maxTarget),
+  )
+  const setTarget = (l: number) => set(targetKey, String(l))
+
+  // Per-category cost (×4 abilities) from curAbility -> target.
+  const cost = useMemo(() => {
+    const byCat: Record<string, number> = {}
+    let coins = 0
+    for (const row of ABILITY_LEVELS) {
+      if (row.level <= curAbility || row.level > target) continue
+      coins += row.coins * 4
+      for (const m of row.mats) byCat[m.cat] = (byCat[m.cat] ?? 0) + m.qty * 4
     }
-    return order.map((material) => ({ material, amount: map[material] }))
+    return { byCat, coins }
+  }, [curAbility, target])
+
+  // Build display rows with have + fill-in substitutes.
+  const rows = useMemo(() => {
+    let hetero = parseInput(values['heterogeneousUnit'] ?? '')
+    let expansion = parseInput(values['expansionCore'] ?? '')
+    // tier order so green is filled before blue/purple
+    const order = ['abilityGreen', 'abilityBlue', 'abilityPurple', 'wdGreen', 'wdBlue', 'wdPurple', 'anomalyPilgrimage']
+    return order
+      .filter((cat) => cost.byCat[cat])
+      .map((cat) => {
+        const need = cost.byCat[cat]
+        const storeKey = effectiveResourceKey(CATEGORY_TO_KEY[cat], char)
+        const label = displayLabel(CATEGORY_TO_KEY[cat], CATEGORY_TO_KEY[cat], char)
+        const realHave = parseInput(values[storeKey] ?? '')
+        let have = realHave
+        let note: string | undefined
+        const f = CAT_FILL[cat]
+        if (f) {
+          const [pool, tier] = f
+          const rate = RATE[tier]
+          const shortfall = Math.max(0, need - realHave)
+          const avail = pool === 'expansionCore' ? expansion : hetero
+          const filled = Math.min(shortfall, Math.floor(avail / rate))
+          if (filled > 0) {
+            if (pool === 'expansionCore') expansion -= filled * rate
+            else hetero -= filled * rate
+            have = realHave + filled
+            note = `+${filled} from ${pool === 'expansionCore' ? 'Expansion Cores' : 'Heterogeneous Units'} (${filled * rate} used)`
+          }
+        }
+        return { cat, label, need, have, note }
+      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, blocks])
+  }, [cost, values, char])
+
+  const coinsHave = parseInput(values['coins'] ?? '')
+
+  // Passive skills + life skills (manual trackers, per-character names).
+  const keyFor = (m: string) => effectiveResourceKey(resourceKeyForMaterial(m), char)
+  const passives = [...gameData.abilities.passive1, ...gameData.abilities.passive2]
 
   return (
     <div className="calc">
       <CharacterBanner />
-      <section className="panel reach">
-        <h3>Progression checker — abilities &amp; passives</h3>
-        <p className="reach-note">
-          Each combat ability costs the amounts below (there are four of them), plus the two passive
-          skills. Tick the skills you've already maxed, then in <strong>Still need</strong> enter how
-          many of each material you have and check them off — the rest keeps tracking.
-        </p>
-      </section>
 
-      <div className="ability-grid">
-        {blocks.map((b) => (
-          <section key={b.id} className={`panel ability-card${isDone(b.id) ? ' done' : ''}`}>
-            <label className="ability-head">
-              <input
-                type="checkbox"
-                checked={isDone(b.id)}
-                onChange={(e) => setDoneFlag(b.id, e.target.checked)}
-              />
-              <h4>{b.title}</h4>
-            </label>
-            <div className="cost-list">
-              {b.rows.map((r) => (
-                <div className="cost-row" key={r.material}>
-                  <IconStack name={label(r.material)} />
-                  <span className="cost-label">{label(r.material)}</span>
-                  <span className="cost-amount">{short(r.amount)}</span>
-                </div>
+      {!owned ? (
+        <section className="panel reach">
+          <h3>Ability upgrades</h3>
+          <p className="reach-note">
+            Select a character <strong>and set its level</strong> on the <strong>My Characters</strong>{' '}
+            tab to calculate ability-upgrade costs. Ability levels are capped by ascension, so set the
+            character's level and ascension first.
+          </p>
+        </section>
+      ) : (
+        <section className="panel target">
+          <div className="target-head">
+            <h3>Upgrade all 4 abilities</h3>
+            <div className="target-badge">Lv {target}</div>
+          </div>
+          <div className="ability-current">
+            <span>My current ability level:</span>
+            <select
+              value={String(curAbility)}
+              onChange={(e) => set(cAbilityKey(char), e.target.value)}
+              title="Set once here — editable anytime"
+            >
+              {Array.from({ length: maxTarget }, (_, i) => i + 1).map((a) => (
+                <option key={a} value={a}>
+                  Lv {a}
+                </option>
               ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      <section className="panel target">
-        <h3>Still need — add what you have &amp; check it off</h3>
-        <div className="cost-list">
-          {remaining.length === 0 ? (
-            <p className="reach-note good">Everything ticked — all abilities maxed! 🎉</p>
+            </select>
+            <span className="muted">
+              capped at Lv {maxTarget} by Ascension {asc}
+            </span>
+          </div>
+          {maxTarget <= curAbility ? (
+            <p className="reach-note">
+              Abilities are already at the max for Ascension {asc} (Lv {maxTarget}). Raise the
+              character's ascension on My Characters to unlock higher ability levels.
+            </p>
           ) : (
-            remaining.map((r) => (
-              <TrackRow
-                key={r.material}
-                material={r.material}
-                display={label(r.material)}
-                needed={r.amount}
-                have={haveOf(r.material)}
-                onHave={(v) => setHaveOf(r.material, v)}
-              />
-            ))
+            <>
+              <Slider levels={levels} value={target} onChange={setTarget} />
+              <div className="cost-list">
+                <CostRow label="Beetle Coins" amount={cost.coins} iconName="Beetle Coins" have={coinsHave} />
+                {rows.map((r) => (
+                  <CostRow
+                    key={r.cat}
+                    label={r.label}
+                    amount={r.need}
+                    iconName={r.label}
+                    have={r.have}
+                    extra={r.note ? <span className="fill-note">{r.note}</span> : undefined}
+                  />
+                ))}
+              </div>
+              <p className="footnote">
+                Costs are per ability level × 4 abilities. Beetle Coins are the same for every
+                character; materials are {ch?.name}'s specific ones.
+              </p>
+            </>
           )}
+        </section>
+      )}
+
+      <section className="panel breakdown">
+        <h3>Passive skills (1 &amp; 2)</h3>
+        <div className="cost-list">
+          {passives.map((r, i) => (
+            <TrackRow
+              key={`${r.material}-${i}`}
+              display={displayLabel(resourceKeyForMaterial(r.material), r.material, char)}
+              needed={r.amount}
+              have={values[keyFor(r.material)] ?? ''}
+              onHave={(v) => set(keyFor(r.material), v)}
+            />
+          ))}
         </div>
       </section>
 
@@ -158,10 +232,10 @@ export function AbilitiesTab() {
           {gameData.lifeSkills.map((l) => (
             <TrackRow
               key={l.material}
-              material={l.material}
+              display={l.material}
               needed={l.amount}
-              have={haveOf(l.material)}
-              onHave={(v) => setHaveOf(l.material, v)}
+              have={values[resourceKeyForMaterial(l.material)] ?? ''}
+              onHave={(v) => set(resourceKeyForMaterial(l.material), v)}
             />
           ))}
         </div>

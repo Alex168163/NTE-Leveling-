@@ -7,6 +7,19 @@ import type { GameData, RosterChar } from '../types'
 const game = gameData as unknown as GameData
 
 export const roster: RosterChar[] = game.roster ?? []
+export const ABILITY_LEVELS = game.abilityLevels ?? []
+
+// Category key -> resource store key (so ability costs use the same pools).
+export const CATEGORY_TO_KEY: Record<string, string> = {
+  anomalyHunt: 'anomalyHunt',
+  anomalyPilgrimage: 'anomalyPilgrimage',
+  abilityGreen: 'ability:Green',
+  abilityBlue: 'ability:Blue',
+  abilityPurple: 'ability:Purple',
+  wdGreen: 'wd:Green',
+  wdBlue: 'wd:Blue',
+  wdPurple: 'wd:Purple',
+}
 
 // The store key for the currently-selected character. '' = none / unreleased.
 export const SELECTED_KEY = 'ui:character'
@@ -61,6 +74,33 @@ export function parseCharLevel(raw: string | undefined): number | null {
   if (raw == null || raw === '' || raw === 'none') return null
   const n = Number(raw)
   return Number.isFinite(n) ? n : null
+}
+
+// ---- ascension (stars) ---------------------------------------------------
+export const cAscKey = (name: string) => `casc:${name}`
+export const cAbilityKey = (name: string) => `cability:${name}`
+
+// The ascension you must have to be AT a level (1/20 -> 0, 30 -> 1, ... 80 -> 6).
+export function ascensionForLevel(level: number): number {
+  return level <= 20 ? 0 : Math.floor((level - 20) / 10)
+}
+// Highest ascension selectable at a level: current, or one ahead (20–70).
+export function maxAscensionAt(level: number): number {
+  return Math.min(6, ascensionForLevel(level) + (level >= 20 && level < 80 ? 1 : 0))
+}
+// Resolve a character's ascension from its stored value, clamped to [current, max].
+export function charAscension(stored: string | undefined, level: number): number {
+  const def = ascensionForLevel(level)
+  if (stored == null || stored === '') return def
+  const n = Number(stored)
+  if (!Number.isFinite(n)) return def
+  return Math.max(def, Math.min(maxAscensionAt(level), n))
+}
+// Highest ability level reachable at a given ascension.
+export function maxAbilityLevel(ascension: number): number {
+  let max = 1
+  for (const r of ABILITY_LEVELS) if (r.reqAscension <= ascension && r.level > max) max = r.level
+  return max
 }
 
 // ---- ascension-already-done flag ----------------------------------------

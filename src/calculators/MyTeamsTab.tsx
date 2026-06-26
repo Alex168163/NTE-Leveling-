@@ -9,8 +9,13 @@ import {
   effectiveResourceKey,
   parseCharLevel,
   cLevelKey,
+  cAscKey,
+  charAscension,
+  ascensionForLevel,
   materialMeta,
 } from '../lib/characters'
+
+const star = (asc: number) => '★'.repeat(asc)
 import { useResources } from '../state/resources'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
@@ -37,7 +42,9 @@ function teamTotals(names: string[], values: Record<string, string>): TeamTotals
     const ch = getCharacter(name)
     if (!ch) continue
     const from = parseCharLevel(values[cLevelKey(name)]) ?? 1
-    const c = cumulativeCost(STEPS, 80, from)
+    const asc = charAscension(values[cAscKey(name)], from)
+    const ascDone = asc > ascensionForLevel(from) ? from : null
+    const c = cumulativeCost(STEPS, 80, from, ascDone)
     xp += c.xp
     coins += c.coins
     for (const req of Object.values(c.mats)) {
@@ -98,21 +105,37 @@ export function MyTeamsTab() {
             </div>
 
             <div className="team-slots">
-              {names.map((name, s) => (
-                <div className="team-slot" key={s}>
-                  <div className="team-portrait">
-                    {name ? <IconStack name={name} size={64} /> : <div className="char-portrait none small">?</div>}
+              {names.map((name, s) => {
+                const lvl = name ? parseCharLevel(values[cLevelKey(name)]) : null
+                const asc = name && lvl != null ? charAscension(values[cAscKey(name)], lvl) : 0
+                return (
+                  <div className="team-slot" key={s}>
+                    <div className="team-portrait">
+                      {name ? (
+                        <IconStack name={name} size={64} />
+                      ) : (
+                        <div className="char-portrait none small">?</div>
+                      )}
+                    </div>
+                    <select value={name} onChange={(e) => setSlot(t, s, e.target.value)}>
+                      <option value="">— empty —</option>
+                      {roster.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name} ({c.rank})
+                        </option>
+                      ))}
+                    </select>
+                    {name && (
+                      <div className="team-slot-info">
+                        {lvl != null ? `Lv ${lvl}` : 'no level set'}
+                        {lvl != null && lvl >= 20 && asc > 0 && (
+                          <span className="char-stars"> {star(asc)}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <select value={name} onChange={(e) => setSlot(t, s, e.target.value)}>
-                    <option value="">— empty —</option>
-                    {roster.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name} ({c.rank})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {filled === 0 ? (
