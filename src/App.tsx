@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useResources } from './state/resources'
+import { useLang, LANGUAGES } from './lib/i18n'
 import { ResourcesTab } from './calculators/ResourcesTab'
 import { MyCharactersTab } from './calculators/MyCharactersTab'
 import { CharacterCalc } from './calculators/CharacterCalc'
@@ -33,8 +34,15 @@ export default function App() {
   const [active, setActive] = useState(TABS[0].id)
   const tab = TABS.find((t) => t.id === active)!
   const { reset, values, set } = useResources()
+  const { lang, setLang, t, rtl } = useLang()
   const [playing, setPlaying] = useState(false)
   const eggSeen = values['egg:seen'] === '1'
+
+  // Reflect the chosen language on the document (incl. right-to-left for Arabic).
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.documentElement.dir = rtl ? 'rtl' : 'ltr'
+  }, [lang, rtl])
 
   // Secret: click the NTE logo 20× within 15s to bring the easter-egg button back.
   const logoClicks = useRef<number[]>([])
@@ -77,19 +85,34 @@ export default function App() {
       <header className="app-header">
         <div className="logo">
           <span className="logo-n" onClick={onLogoClick}>NTE</span>
-          <span className="logo-sub">Leveling Calculator &amp; Resource Checker</span>
+          <span className="logo-sub">{t('Leveling Calculator & Resource Checker')}</span>
         </div>
         <div className="header-right">
           <div className="logo-tag">Neverness&nbsp;To&nbsp;Everness · QOL tool</div>
-          <button
-            className="reset-btn"
-            onClick={() => {
-              if (confirm('Clear every value you have entered across all tabs?')) reset()
-            }}
-            title="Clear all saved inputs"
-          >
-            Reset inputs
-          </button>
+          <div className="header-controls">
+            <select
+              className="lang-select"
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              title={t('Language')}
+              aria-label={t('Language')}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="reset-btn"
+              onClick={() => {
+                if (confirm(t('Clear every value you have entered across all tabs?'))) reset()
+              }}
+              title={t('Reset All Inputs')}
+            >
+              {t('Reset All Inputs')}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -100,14 +123,14 @@ export default function App() {
       </div>
 
       <nav className="tabs">
-        {TABS.map((t) => (
+        {TABS.map((tb) => (
           <button
-            key={t.id}
-            className={t.id === active ? 'tab active' : 'tab'}
-            onClick={() => setActive(t.id)}
+            key={tb.id}
+            className={tb.id === active ? 'tab active' : 'tab'}
+            onClick={() => setActive(tb.id)}
           >
-            <span className="tab-label">{t.label}</span>
-            <span className="tab-hint">{t.hint}</span>
+            <span className="tab-label">{t(tb.label)}</span>
+            <span className="tab-hint">{t(tb.hint)}</span>
           </button>
         ))}
       </nav>
