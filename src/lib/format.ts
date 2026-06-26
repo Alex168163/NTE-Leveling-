@@ -40,13 +40,33 @@ export function parseInput(raw: string): number {
   return Math.min(MAX_INPUT, Math.max(0, Math.round(v)))
 }
 
-// Keep only characters that can form a valid resource entry: digits, one dot,
-// and a single trailing k/m. Used to sanitise keystrokes in the inputs.
+// Max characters allowed in any resource input box.
+export const MAX_INPUT_CHARS = 7
+
+// Uncapped numeric value of an already-sanitised string (for clamp checks).
+function rawValue(s: string): number {
+  const m = s.match(/^([\d.]+)\s*([km])?$/)
+  if (!m) return 0
+  let v = parseFloat(m[1])
+  if (!isFinite(v)) return 0
+  if (m[2] === 'k') v *= 1_000
+  else if (m[2] === 'm') v *= 1_000_000
+  return v
+}
+
+// Sanitise a keystroke into a valid resource entry: digits, one optional dot,
+// and a single trailing k/m. Rules:
+//  - must contain at least one digit (letters-only is rejected -> empty),
+//  - at most 7 characters,
+//  - the value can never exceed 999m (clamped to "999m").
 export function sanitizeResource(raw: string): string {
-  let s = raw.replace(/[^\d.km]/gi, '')
-  // collapse to: digits, optional single dot, optional single trailing k/m
-  const m = s.match(/^(\d*\.?\d*)\s*([kmKM])?/)
+  const s = raw.toLowerCase().replace(/[^\d.km]/g, '')
+  const m = s.match(/^(\d*\.?\d*)\s*([km])?/)
   if (!m) return ''
-  const suffix = m[2] ? m[2].toLowerCase() : ''
-  return m[1] + suffix
+  const digits = m[1]
+  if (!/\d/.test(digits)) return '' // letters-only / no number -> invalid
+  let out = digits + (m[2] || '')
+  if (out.length > MAX_INPUT_CHARS) out = out.slice(0, MAX_INPUT_CHARS)
+  if (rawValue(out) > MAX_INPUT) return '999m' // hard cap at 999m
+  return out
 }

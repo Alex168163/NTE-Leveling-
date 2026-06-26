@@ -6,7 +6,7 @@
 // stay as manual trackers.
 import { useMemo } from 'react'
 import { gameData } from '../lib/calc'
-import { parseInput, short, comma } from '../lib/format'
+import { parseInput, short, comma, sanitizeResource } from '../lib/format'
 import { IconStack } from '../components/IconStack'
 import { CostRow } from '../components/CostRow'
 import { Slider } from '../components/Slider'
@@ -62,8 +62,9 @@ function TrackRow({
         className="track-input"
         type="text"
         placeholder="0"
+        maxLength={7}
         value={have}
-        onChange={(e) => onHave(e.target.value)}
+        onChange={(e) => onHave(sanitizeResource(e.target.value))}
         spellCheck={false}
       />
       <span className="track-need" title={comma(needed)}>

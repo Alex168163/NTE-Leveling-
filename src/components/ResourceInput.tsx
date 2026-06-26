@@ -1,7 +1,7 @@
 // A compact resource input with its material icon(s). Accepts plain numbers or
 // k/m shorthand. Kept visually small per the spec (~4-char feel).
 import { IconStack } from './IconStack'
-import { sanitizeResource } from '../lib/format'
+import { sanitizeResource, MAX_INPUT_CHARS } from '../lib/format'
 
 export function ResourceInput({
   label,
@@ -25,7 +25,8 @@ export function ResourceInput({
         inputMode="text"
         className={wide ? 'wide' : ''}
         placeholder="0"
-        title="Accepts k (thousand) and m (million), e.g. 26k or 1.6m — max 999m"
+        maxLength={MAX_INPUT_CHARS}
+        title="Numbers only, with optional k (thousand) or m (million), e.g. 26k or 1.6m — max 7 chars, capped at 999m"
         value={value}
         onChange={(e) => onChange(sanitizeResource(e.target.value))}
         spellCheck={false}

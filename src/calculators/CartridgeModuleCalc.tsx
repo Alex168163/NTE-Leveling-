@@ -132,6 +132,7 @@ export function CartridgeModuleCalc() {
                       className="mini"
                       inputMode="numeric"
                       placeholder="0"
+                      maxLength={7}
                       value={values[wantKey(it.key)] ?? ''}
                       onChange={(e) => set(wantKey(it.key), sanitizeResource(e.target.value))}
                     />
