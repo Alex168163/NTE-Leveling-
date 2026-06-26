@@ -11,7 +11,7 @@ import { IconStack } from '../components/IconStack'
 import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
 import { resourceKeyForMaterial } from '../lib/resourceKey'
-import { SELECTED_KEY, displayLabel } from '../lib/characters'
+import { SELECTED_KEY, displayLabel, effectiveResourceKey } from '../lib/characters'
 import type { AbilityRow } from '../types'
 
 const COMBAT_SKILLS = ['Base Attack', 'Redirect Skill', 'Ultimate', 'Support Skill']
@@ -74,9 +74,10 @@ export function AbilitiesTab() {
   const char = values[SELECTED_KEY] ?? ''
   const isDone = (id: string) => values[`adone:${id}`] === '1'
   const setDoneFlag = (id: string, on: boolean) => set(`adone:${id}`, on ? '1' : '')
-  // Resource value for a material, shared across every tab via its canonical key.
-  const haveOf = (material: string) => values[resourceKeyForMaterial(material)] ?? ''
-  const setHaveOf = (material: string, v: string) => set(resourceKeyForMaterial(material), v)
+  // Effective store key (character-specific pool when one is selected).
+  const keyFor = (material: string) => effectiveResourceKey(resourceKeyForMaterial(material), char)
+  const haveOf = (material: string) => values[keyFor(material)] ?? ''
+  const setHaveOf = (material: string, v: string) => set(keyFor(material), v)
   // Character-specific display name for a generic material (#5).
   const label = (material: string) => displayLabel(resourceKeyForMaterial(material), material, char)
 
@@ -121,7 +122,7 @@ export function AbilitiesTab() {
             <div className="cost-list">
               {b.rows.map((r) => (
                 <div className="cost-row" key={r.material}>
-                  <IconStack name={r.material} />
+                  <IconStack name={label(r.material)} />
                   <span className="cost-label">{label(r.material)}</span>
                   <span className="cost-amount">{short(r.amount)}</span>
                 </div>

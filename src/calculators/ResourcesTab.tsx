@@ -1,7 +1,8 @@
-// "My Resources" — the first tab. Lists every resource type in one place. Each
-// input is wired to the same shared store (by canonical key) that the other
-// tabs use, so filling something in here automatically fills it in everywhere
-// (Characters, Arcs, Cartridges & Modules, Abilities).
+// "My Resources" (first tab). One input box for EVERY specific resource, each
+// with its single correct icon (no grouped icons) — anomaly-hunt has all 7,
+// world/ability materials are split per tier, etc. Arc materials are the only
+// grouped exception (#13). Values are shared across the app and stay the same
+// regardless of which character is selected (#17).
 import { gameData } from '../lib/calc'
 import { cleanName } from '../lib/format'
 import { ResourceInput } from '../components/ResourceInput'
@@ -29,6 +30,13 @@ function xpGroup(title: string, sources: XpSource[], prefix: string): Group {
   }
 }
 
+// One box per named material in a category — keyed by the material name so it
+// shares with the per-character pools used by the calculators.
+function namedGroup(title: string, category: string): Group {
+  const names = gameData.inGameNames[category] ?? []
+  return { title, items: names.map((name) => ({ key: name, label: name, iconName: name })) }
+}
+
 export function ResourcesTab() {
   const { values, set } = useResources()
 
@@ -37,35 +45,23 @@ export function ResourcesTab() {
     xpGroup('Character XP — Hunter Guides', gameData.xpSources.character, 'guide'),
     xpGroup('Arc XP — Dyes', gameData.xpSources.arc, 'dye'),
     xpGroup('Cartridge / Module XP — Manholes', gameData.xpSources.cartridgeModule, 'manhole'),
+
+    namedGroup('Anomaly Hunt Materials', 'anomalyHunt'),
+    namedGroup('Anomaly Pilgrimage Materials', 'anomalyPilgrimage'),
+    namedGroup('Green Ability Upgrades', 'abilityGreen'),
+    namedGroup('Blue Ability Upgrades', 'abilityBlue'),
+    namedGroup('Purple Ability Upgrades', 'abilityPurple'),
+    namedGroup('Green World Materials', 'wdGreen'),
+    namedGroup('Blue World Materials', 'wdBlue'),
+    namedGroup('Purple World Materials', 'wdPurple'),
+
     {
-      title: 'World Materials',
-      items: [
-        { key: 'wd:Green', label: 'Green World Material', iconName: 'Green World Material' },
-        { key: 'wd:Blue', label: 'Blue World Material', iconName: 'Blue World Material' },
-        { key: 'wd:Purple', label: 'Purple World Material', iconName: 'Purple World Material' },
-      ],
-    },
-    {
-      title: 'Ability Upgrade Materials',
-      items: [
-        { key: 'ability:Green', label: 'Green Ability Upgrade Material', iconName: 'Green Ability Upgrade Material' },
-        { key: 'ability:Blue', label: 'Blue Ability Upgrade Material', iconName: 'Blue Ability Upgrade Material' },
-        { key: 'ability:Purple', label: 'Purple Ability Upgrade Material', iconName: 'Purple Ability Upgrade Material' },
-      ],
-    },
-    {
-      title: 'Arc Materials',
+      // Arc materials are the one grouped exception (#13).
+      title: 'Arc Materials (grouped)',
       items: [
         { key: 'arc:Green', label: 'Green Arc Material', iconName: 'Green Arc Material' },
         { key: 'arc:Blue', label: 'Blue Arc Material', iconName: 'Blue Arc Material' },
         { key: 'arc:Purple', label: 'Purple Arc Material', iconName: 'Purple Arc Material' },
-      ],
-    },
-    {
-      title: 'Anomaly Materials',
-      items: [
-        { key: 'anomalyHunt', label: 'Anomaly Hunt Material', iconName: 'Anomaly Hunt Material' },
-        { key: 'anomalyPilgrimage', label: 'Anomaly Pilgrimage Material', iconName: 'Anomaly Pilgrimage Material' },
       ],
     },
     {
@@ -89,8 +85,8 @@ export function ResourcesTab() {
       <section className="panel reach">
         <h3>My Resources</h3>
         <p className="reach-note">
-          Fill in everything you own <strong>here, once</strong>. These values are shared across the
-          whole app, so they automatically fill in on every other tab — and they stay the same no
+          Fill in everything you own <strong>here, once</strong>. Every specific material has its own
+          box with its own icon. These values are shared across the whole app and stay the same no
           matter which character is selected. Inputs accept <strong>k</strong> (thousand) and{' '}
           <strong>m</strong> (million), e.g. <code>26k</code> or <code>1.6m</code>, up to 999m.
         </p>

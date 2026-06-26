@@ -70,6 +70,7 @@ export interface GameData {
   filledModuleSet: Record<string, number>
   inGameNames: Record<string, string[]>
   nameToCategory: Record<string, string>
+  materialIcon: Record<string, string>
   roster: RosterChar[]
 }
 

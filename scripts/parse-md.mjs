@@ -227,10 +227,37 @@ const CATEGORIES = [
 
 data.inGameNames = {} // category -> [name in example order]
 const nameToCategory = {} // in-game name -> category
+const materialIcon = {} // in-game name -> its single specific icon path
 const charMats = {} // character -> { category: in-game material name }
 
+const ASSET_FILES = new Set(readdirSync(ASSETS_DIR))
+// The specific icon file for a category + example number (#18 maps each named
+// material to one exact icon — no grouping for character-specific materials).
+function iconFileFor(catKey, n) {
+  switch (catKey) {
+    case 'anomalyHunt':
+      return `Anomaly Hunt Material Example ${n}.png`
+    case 'anomalyPilgrimage':
+      return `Anomaly Pilgrimage Material Example ${n}.png`
+    case 'abilityGreen':
+      return `Bronze Ability Upgrade Example ${n}.png`
+    case 'abilityBlue':
+      return `Silver Ability Upgrade Example ${n}.png`
+    case 'abilityPurple':
+      return `Gold Ability Upgrade Example ${n}.png`
+    case 'wdGreen':
+      return n === 1 ? `Green World Materal Example.png` : `Green World Materal Example ${n}.png`
+    case 'wdBlue':
+      return n === 1 ? `Blue World Materal Example.png` : `Blue World Materal Example ${n}.png`
+    case 'wdPurple':
+      return n === 1 ? `Purple World Materal Example.png` : `Purple World Materal Example ${n}.png`
+    default:
+      return null
+  }
+}
+
 for (const c of CATEGORIES) {
-  // #18 — ordered in-game names
+  // #18 — ordered in-game names + each name's single specific icon
   const arr = []
   for (const r of tableAfter(c.name18, SEC18)) {
     const ex = num(r['Example'])
@@ -238,6 +265,8 @@ for (const c of CATEGORIES) {
     if (nm) {
       arr[ex - 1] = nm
       nameToCategory[nm] = c.key
+      const file = iconFileFor(c.key, ex)
+      if (file && ASSET_FILES.has(file)) materialIcon[nm] = `assets/${file}`
     }
   }
   data.inGameNames[c.key] = arr.filter(Boolean)
@@ -250,6 +279,7 @@ for (const c of CATEGORIES) {
   }
 }
 data.nameToCategory = nameToCategory
+data.materialIcon = materialIcon
 
 // Character roster: every character named in #19, with rank read from its
 // portrait filename ("Adler - A.png" -> rank A).

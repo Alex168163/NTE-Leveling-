@@ -7,6 +7,8 @@ import gameData from '../data/gameData.json'
 
 const groups = iconGroups as Record<string, string[]>
 const nameToCategory = (gameData as { nameToCategory?: Record<string, string> }).nameToCategory ?? {}
+// in-game name -> its single specific icon (no grouping for named materials)
+const materialIcon = (gameData as { materialIcon?: Record<string, string> }).materialIcon ?? {}
 
 // Each example-material category maps to its icon group. Ability-upgrade tiers
 // use Green/Blue/Purple wording now (#16) but reuse the Bronze/Silver/Gold art.
@@ -78,9 +80,12 @@ function resolveKey(name: string): string | null {
   return null
 }
 
-// Returns every matching icon URL for a material name (possibly empty, e.g.
-// for example-only materials like "Eternal Memory" which have no art).
+// Returns the icon URL(s) for a material name. A specific in-game named
+// material (e.g. "Water Moon Pick") resolves to its ONE exact icon — no
+// grouping. Everything else resolves to its full icon group.
 export function iconsFor(name: string): string[] {
+  const specific = materialIcon[name] ?? materialIcon[name.trim()]
+  if (specific) return [url(specific)]
   const key = resolveKey(name)
   if (!key || !groups[key]) return []
   return groups[key].map(url)

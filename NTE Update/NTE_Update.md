@@ -73,6 +73,7 @@ Add a name to all example materials so character-specific changes to leveling ca
 - Filterable by **S-Rank / A-Rank** and by typing: **Cosmos, Anima, Chaos, Incantation, Lakshana, Psyche**.
 - Default: show all characters, grouped by typing and listed **S → A**.
 - Resources tied to a character only show in the **Character, Arcs, Cartridges & Modules, and Abilities & Life Skills** tabs. Selecting another character updates those tabs to that character's resources.
+- When a character **is** selected, show **only their one specific material and its single icon** for each slot — never the grouped "all icons" set.
 - If **Unreleased / No Character** is chosen, show the regular example materials with the broad name (e.g., *Green World Drop Material*). **This is the default on app open.**
 - Add a **question-mark icon** (same size as character icons) for **"Unreleased / No Character Selected."** This is more of a test option, since example resources are being removed from the My Resources tab.
 
@@ -105,8 +106,9 @@ Add the word **"Leveling"** to the end of these tab names and remove the trailin
 
 - Teams are made up of **4 characters**.
 - Let users put 4 characters into a new team.
-- Based on character data and resources, show what's needed to fully build that team, plus a comparison against resources already owned.
-- Support building up to **5 saved teams** — nothing to input but the characters.
+- Based on character data and resources, show the total resources still needed to fully level the team to **80**, plus a comparison against resources already owned (what's left).
+- Support building up to **10 saved teams** — nothing to input but the characters.
+- Place this tab **before the 1 → 80 tab**.
 
 ---
 
@@ -173,11 +175,17 @@ Ability Upgrades, Arc Materials, and World Materials follow a three-tier system 
 ## 17. "My Resources" Consistency + Input Boxes
 
 - **My Resources** must always be the **same regardless of the character selected**.
-- Give each of these its **own input box** and change the name to its **in-game name**: Ability Upgrades, Arc Materials, World Materials, Anomaly Hunt, and Anomaly Pilgrimage materials. This makes it easier to apply to specific characters.
+- **No grouping on My Resources except Arc Materials.** Every specific resource gets its **own input box** with its **single correct icon** — e.g. Anomaly Hunt has all **7** separate boxes, Ability Upgrades and World Materials are split per tier into their individual named boxes (using the in-game names from #18). Arc Materials stay grouped (Green/Blue/Purple). This makes it easy to apply to specific characters.
 
 ---
 
-## 18. In-Game Names for Example Materials
+## 18. In-Game Names for Example Materials (icon → name mapping)
+
+> Each **Example number maps to ONE specific icon**. That icon is the single icon
+> shown for that named material — when a character is selected, only their one
+> specific material/icon is shown (no grouped icons). The grouped "all icons"
+> view is only for the generic/unselected case.
+
 
 ### Anomaly Hunt Material
 

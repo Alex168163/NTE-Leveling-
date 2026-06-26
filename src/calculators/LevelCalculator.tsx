@@ -12,7 +12,7 @@ import { Slider } from '../components/Slider'
 import { XpEquivalent } from '../components/XpEquivalent'
 import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
-import { SELECTED_KEY, displayLabel } from '../lib/characters'
+import { SELECTED_KEY, displayLabel, effectiveResourceKey } from '../lib/characters'
 
 export interface MatInput {
   id: string
@@ -59,7 +59,8 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
     const counts: Record<string, number> = {}
     for (const c of COLORS) counts[c] = parseInput(values[xpKey(c)] ?? '')
     const mats: Record<string, number> = {}
-    for (const m of config.matInputs) mats[m.id] = parseInput(values[m.id] ?? '')
+    for (const m of config.matInputs)
+      mats[m.id] = parseInput(values[effectiveResourceKey(m.id, char)] ?? '')
     return { xp: xpFromSources(config.xpSources, counts), coins: parseInput(values['coins'] ?? ''), mats }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, config])
@@ -135,15 +136,19 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
               onChange={(v) => set('coins', v)}
               wide
             />
-            {config.matInputs.map((m) => (
-              <ResourceInput
-                key={m.id}
-                label={displayLabel(m.id, m.label, char)}
-                iconName={m.iconName}
-                value={values[m.id] ?? ''}
-                onChange={(v) => set(m.id, v)}
-              />
-            ))}
+            {config.matInputs.map((m) => {
+              const disp = displayLabel(m.id, m.label, char)
+              const rk = effectiveResourceKey(m.id, char)
+              return (
+                <ResourceInput
+                  key={m.id}
+                  label={disp}
+                  iconName={disp}
+                  value={values[rk] ?? ''}
+                  onChange={(v) => set(rk, v)}
+                />
+              )
+            })}
           </div>
         </div>
       </section>
@@ -181,15 +186,18 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             extra={<XpEquivalent xp={totals.xp} sources={config.xpSources} />}
           />
           <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={budget.coins} />
-          {Object.values(totals.mats).map((r) => (
-            <CostRow
-              key={r.id}
-              label={displayLabel(r.id, r.label, char)}
-              amount={r.qty}
-              iconName={r.iconName}
-              have={budget.mats[r.id] ?? 0}
-            />
-          ))}
+          {Object.values(totals.mats).map((r) => {
+            const disp = displayLabel(r.id, r.label, char)
+            return (
+              <CostRow
+                key={r.id}
+                label={disp}
+                amount={r.qty}
+                iconName={disp}
+                have={budget.mats[r.id] ?? 0}
+              />
+            )
+          })}
         </div>
       </section>
 
@@ -223,12 +231,15 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
                     <span className="muted">—</span>
                   ) : (
                     <span className="mat-cells">
-                      {s.reqs.map((r) => (
-                        <span key={r.id} className="mat-cell">
-                          <IconStack name={r.iconName} size={20} />
-                          {r.qty}× {displayLabel(r.id, r.label, char)}
-                        </span>
-                      ))}
+                      {s.reqs.map((r) => {
+                        const disp = displayLabel(r.id, r.label, char)
+                        return (
+                          <span key={r.id} className="mat-cell">
+                            <IconStack name={disp} size={20} />
+                            {r.qty}× {disp}
+                          </span>
+                        )
+                      })}
                     </span>
                   )}
                 </td>

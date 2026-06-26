@@ -37,3 +37,17 @@ export function displayLabel(storeKey: string, fallback: string, charName?: stri
   if (!cat || !ch) return fallback
   return ch.materials?.[cat] ?? fallback
 }
+
+// The effective resource-store key for a category-keyed requirement, given the
+// selected character. Character-specific categories resolve to the character's
+// SPECIFIC named material (so each character draws from its own pool, matching
+// the per-material boxes on My Resources). Non-character keys (arc:*, coins,
+// XP) are returned unchanged. With no character, the generic key is returned.
+export function effectiveResourceKey(storeKey: string, charName?: string): string {
+  const cat = KEY_TO_CATEGORY[storeKey]
+  const ch = getCharacter(charName)
+  if (cat && ch?.materials?.[cat]) return ch.materials[cat]
+  return storeKey
+}
+
+export const isCharacterCategory = (storeKey: string) => storeKey in KEY_TO_CATEGORY

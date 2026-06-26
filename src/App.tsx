@@ -6,6 +6,7 @@ import { CharacterCalc } from './calculators/CharacterCalc'
 import { ArcCalc } from './calculators/ArcCalc'
 import { CartridgeModuleCalc } from './calculators/CartridgeModuleCalc'
 import { AbilitiesTab } from './calculators/AbilitiesTab'
+import { MyTeamsTab } from './calculators/MyTeamsTab'
 import { FullMaxTab } from './calculators/FullMaxTab'
 
 interface Tab {
@@ -22,6 +23,7 @@ const TABS: Tab[] = [
   { id: 'arcs', label: 'Arc Leveling', hint: 'Dyes · XP & ascensions', render: () => <ArcCalc /> },
   { id: 'cm', label: 'Cartridge and Module Leveling', hint: 'Manholes · max to 20', render: () => <CartridgeModuleCalc /> },
   { id: 'abilities', label: 'Ability & Life Skill Leveling', hint: 'Progression checker', render: () => <AbilitiesTab /> },
+  { id: 'teams', label: 'My Teams', hint: 'Up to 10 teams of 4', render: () => <MyTeamsTab /> },
   { id: 'full', label: '1 → 80 Everything', hint: 'The grand total', render: () => <FullMaxTab /> },
 ]
 
