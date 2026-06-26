@@ -103,12 +103,6 @@ export function maxAbilityLevel(ascension: number): number {
   return max
 }
 
-// ---- ascension-already-done flag ----------------------------------------
-// Marks that the ascension for the current 10-level bracket is already paid.
-// Keyed per tab + character (or tab) + level so it saves per character.
-export const ascDoneKey = (tabId: string, who: string, level: number) =>
-  `ascdone:${tabId}:${who || '_'}:${level}`
-
 // ---- friendly display metadata for a resource key ------------------------
 // Generic category keys (e.g. a character that lacks a specific material) get a
 // friendly label + grouped icon; specific named materials map to themselves

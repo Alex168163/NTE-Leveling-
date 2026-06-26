@@ -18,7 +18,6 @@ import {
   effectiveResourceKey,
   cLevelKey,
   parseCharLevel,
-  ascDoneKey,
   cAscKey,
   charAscension,
   ascensionForLevel,
@@ -58,17 +57,16 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
     (fromCharacter ? parseCharLevel(values[curKey]) : Number(values[curKey])) || 1
   const setCurrentLevel = (lv: number) => set(curKey, String(lv))
 
-  // "Ascension already done" for the current bracket (currentLevel -> +10).
-  // Character tab derives this from the character's ascension setting (one ahead,
-  // set on My Characters); the Arc tab keeps a manual checkbox.
+  // A character set "one ahead" on My Characters has already paid the current
+  // bracket's ascension, so its cost is excluded automatically. No manual toggle.
   const hasAscension = currentLevel >= 20 && currentLevel <= 70
   const fromCharAsc = !!config.usesCharacterLevel && !!char
-  const ascKey = ascDoneKey(config.id, char, currentLevel)
-  const ascChecked = fromCharAsc
-    ? charAscension(values[cAscKey(char)], currentLevel) > ascensionForLevel(currentLevel)
-    : hasAscension && values[ascKey] === '1'
-  const ascDoneLevel = ascChecked && hasAscension ? currentLevel : null
-  const showAscCheckbox = hasAscension && !fromCharAsc
+  const ascDoneLevel =
+    fromCharAsc &&
+    hasAscension &&
+    charAscension(values[cAscKey(char)], currentLevel) > ascensionForLevel(currentLevel)
+      ? currentLevel
+      : null
 
   const minTarget = Math.max(currentLevel, levels[0])
   const sliderLevels = levels.filter((l) => l >= minTarget)
@@ -161,26 +159,6 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             </button>
           ))}
         </div>
-        {showAscCheckbox && (
-          <label className="asc-done">
-            <input
-              type="checkbox"
-              checked={ascChecked}
-              onChange={(e) => set(ascKey, e.target.checked ? '1' : '')}
-            />
-            <span>
-              Already unlocked the <strong>Lv {currentLevel}→{currentLevel + 10}</strong> ascension
-              (paid for it, just haven't levelled yet)? Removes that ascension's materials &amp; coins
-              from the cost.
-            </span>
-          </label>
-        )}
-        {fromCharAsc && hasAscension && ascChecked && (
-          <p className="reach-note good">
-            ✓ {char} is one ascension ahead — the Lv {currentLevel}→{currentLevel + 10} ascension cost
-            is excluded (set on My Characters).
-          </p>
-        )}
       </section>
 
       {/* ---- Owned resources ---- */}

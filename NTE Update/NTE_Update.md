@@ -44,16 +44,12 @@ Need an XP logo for **Cartridge / Module XP**.
 
 ---
 
-## 4. "Already Unlocked Ascension" Toggle (Characters & Arcs)
+## 4. ~~"Already Unlocked Ascension" Toggle~~ — SUPERSEDED
 
-Add a toggle to the Characters and Arcs leveling tabs:
-
-> **"Already unlocked current ascension from XX–XX? Click here to remove those resources from calculation"**
-
-- `XX–XX` = the current level of their arc/character to the next 10-level increase.
-- Does **not** work with 1–20 (no ascension there).
-- The button removes the current-to-next-10-level material requirement for the current ascension from calculations.
-- It cannot go past that — you can't move ahead in ascension tiers without leveling — but some people may have the current ascension unlocked/paid for the next 10 levels without having leveled up yet.
+> **Removed.** This was replaced by the **per-character ascension selection** (current
+> vs. "one ahead") set on the My Characters / Ability tab. Choosing "one ahead" already
+> marks the current bracket's ascension as paid and removes its cost automatically, so
+> the manual toggle is no longer shown anywhere.
 
 ---
 
