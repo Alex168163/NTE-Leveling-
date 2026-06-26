@@ -348,20 +348,39 @@ input,
 .char-banner {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 14px;
+  padding: 14px 20px;
   border-radius: var(--radius);
-  font-size: 13px;
-  background: rgba(56, 236, 255, 0.1);
+  font-size: 22px;
+  background: linear-gradient(90deg, rgba(56, 236, 255, 0.16), rgba(56, 236, 255, 0.06));
   border: 1px solid var(--edge);
+  box-shadow: var(--glow);
 }
-.char-banner.none {
-  background: rgba(255, 206, 77, 0.12);
-  border-color: rgba(255, 206, 77, 0.5);
-  color: #fff3d6;
+.char-banner .icon-stack img {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+}
+.char-banner-text {
+  font-size: 22px;
 }
 .char-banner strong {
   color: var(--cyan);
+  font-size: 26px;
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(56, 236, 255, 0.5);
+}
+.char-rank.inline {
+  position: static;
+  font-size: 14px;
+  padding: 3px 12px;
+}
+.char-banner.none {
+  background: rgba(255, 206, 77, 0.14);
+  border-color: rgba(255, 206, 77, 0.5);
+  color: #fff3d6;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 /* ---- My Characters tab ---- */

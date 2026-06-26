@@ -17,9 +17,11 @@ export function CharacterBanner() {
   }
   return (
     <div className="char-banner">
-      <IconStack name={ch.name} size={26} />
-      Building for <strong>{ch.name}</strong>
-      {ch.rank && <span className={`char-rank r-${ch.rank}`}>{ch.rank}</span>}
+      <IconStack name={ch.name} size={64} />
+      <span className="char-banner-text">
+        Building for <strong>{ch.name}</strong>
+      </span>
+      {ch.rank && <span className={`char-rank inline r-${ch.rank}`}>{ch.rank}</span>}
     </div>
   )
 }
