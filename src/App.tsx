@@ -32,14 +32,23 @@ const VIDEO_URL = `${import.meta.env.BASE_URL}assets/Rick Roll.mp4`
 export default function App() {
   const [active, setActive] = useState(TABS[0].id)
   const tab = TABS.find((t) => t.id === active)!
-  const { reset } = useResources()
+  const { reset, values, set } = useResources()
   const [playing, setPlaying] = useState(false)
+  const eggSeen = values['egg:seen'] === '1'
 
   return (
     <div className="app">
-      <button className="easter-egg" onClick={() => setPlaying(true)}>
-        Esper Zero and Mint Kissing Here!
-      </button>
+      {!eggSeen && (
+        <button
+          className="easter-egg"
+          onClick={() => {
+            setPlaying(true)
+            set('egg:seen', '1') // only ever shows once
+          }}
+        >
+          Esper Zero and Mint Kissing Here!
+        </button>
+      )}
 
       {playing && (
         <div className="rickroll-overlay">
