@@ -87,5 +87,6 @@ export interface Step {
   to: number
   levelXP: number
   coins: number // ascension coins + leveling coins
+  ascCoins: number // the ascension portion of `coins` (for "ascension already done")
   reqs: Requirement[] // material requirements for this step (excl. xp & coins)
 }

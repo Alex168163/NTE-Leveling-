@@ -12,7 +12,14 @@ import { Slider } from '../components/Slider'
 import { XpEquivalent } from '../components/XpEquivalent'
 import { CharacterBanner } from '../components/CharacterBanner'
 import { useResources } from '../state/resources'
-import { SELECTED_KEY, displayLabel, effectiveResourceKey } from '../lib/characters'
+import {
+  SELECTED_KEY,
+  displayLabel,
+  effectiveResourceKey,
+  cLevelKey,
+  parseCharLevel,
+  ascDoneKey,
+} from '../lib/characters'
 
 export interface MatInput {
   id: string
@@ -22,6 +29,7 @@ export interface MatInput {
 export interface LevelConfig {
   id: string // 'char' | 'arc' — namespaces the target slider
   xpKeyPrefix: string // 'guide' | 'dye' — namespaces XP-source counts
+  usesCharacterLevel?: boolean // char tab: current level comes from the selected character
   steps: Step[]
   xpSources: XpSource[]
   xpLabel: string
@@ -38,11 +46,21 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
   const levels = config.steps.map((s) => s.to) // e.g. [20,30,...,80]
 
   // Current level — the level you're ALREADY at. Locks the slider's floor and
-  // makes the cost cover only the levels you have left. "1" = a new (unlevelled)
-  // character/arc. Persisted per category.
-  const curKey = `ui:cur:${config.id}`
-  const currentLevel = Number(values[curKey] ?? 1) || 1
+  // makes the cost cover only the levels you have left. On the Character tab it
+  // comes from the selected character (set on My Characters); otherwise it's a
+  // per-tab value. "1" = new / unlevelled.
+  const fromCharacter = !!config.usesCharacterLevel && !!char
+  const curKey = fromCharacter ? cLevelKey(char) : `ui:cur:${config.id}`
+  const currentLevel =
+    (fromCharacter ? parseCharLevel(values[curKey]) : Number(values[curKey])) || 1
   const setCurrentLevel = (lv: number) => set(curKey, String(lv))
+
+  // "Ascension already done" for the current bracket (currentLevel -> +10).
+  const hasAscension = currentLevel >= 20 && currentLevel <= 70
+  const who = config.usesCharacterLevel ? char : ''
+  const ascKey = ascDoneKey(config.id, who, currentLevel)
+  const ascChecked = hasAscension && values[ascKey] === '1'
+  const ascDoneLevel = ascChecked ? currentLevel : null
 
   const minTarget = Math.max(currentLevel, levels[0])
   const sliderLevels = levels.filter((l) => l >= minTarget)
@@ -66,13 +84,47 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
   }, [values, config])
 
   const totals = useMemo(
-    () => cumulativeCost(config.steps, target, currentLevel),
-    [config.steps, target, currentLevel],
+    () => cumulativeCost(config.steps, target, currentLevel, ascDoneLevel),
+    [config.steps, target, currentLevel, ascDoneLevel],
   )
   const reach = useMemo(
-    () => maxReach(config.steps, budget, currentLevel),
-    [config.steps, budget, currentLevel],
+    () => maxReach(config.steps, budget, currentLevel, ascDoneLevel),
+    [config.steps, budget, currentLevel, ascDoneLevel],
   )
+
+  // Fill-in substitutes: Heterogeneous Units cover world-material shortfalls and
+  // Expansion Cores cover ability-upgrade shortfalls — used only after your real
+  // resources run out, at Green 1:1, Blue 3:1, Purple 9:1.
+  const fill = useMemo(() => {
+    const RATE: Record<string, number> = { Green: 1, Blue: 3, Purple: 9 }
+    const res: Record<string, { have: number; used: number; sub: string; cost: number }> = {}
+    let hetero = parseInput(values['heterogeneousUnit'] ?? '')
+    let expansion = parseInput(values['expansionCore'] ?? '')
+    for (const color of ['Green', 'Blue', 'Purple']) {
+      for (const kind of ['wd', 'ability'] as const) {
+        const id = `${kind}:${color}`
+        const req = totals.mats[id]
+        if (!req) continue
+        const have = budget.mats[id] ?? 0
+        const shortfall = Math.max(0, req.qty - have)
+        if (shortfall <= 0) continue
+        const rate = RATE[color]
+        const pool = kind === 'wd' ? hetero : expansion
+        const filled = Math.min(shortfall, Math.floor(pool / rate))
+        if (filled <= 0) continue
+        if (kind === 'wd') hetero -= filled * rate
+        else expansion -= filled * rate
+        res[id] = {
+          have: have + filled,
+          used: filled,
+          sub: kind === 'wd' ? 'Heterogeneous Units' : 'Expansion Cores',
+          cost: filled * rate,
+        }
+      }
+    }
+    return res
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totals, budget, values])
 
   // Map color -> the XP source row (for icon + per-unit value).
   const sourceByColor = (c: string) => config.xpSources.find((s) => s.color === c)
@@ -101,6 +153,20 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
             </button>
           ))}
         </div>
+        {hasAscension && (
+          <label className="asc-done">
+            <input
+              type="checkbox"
+              checked={ascChecked}
+              onChange={(e) => set(ascKey, e.target.checked ? '1' : '')}
+            />
+            <span>
+              Already unlocked the <strong>Lv {currentLevel}→{currentLevel + 10}</strong> ascension
+              (paid for it, just haven't levelled yet)? Removes that ascension's materials &amp; coins
+              from the cost.
+            </span>
+          </label>
+        )}
       </section>
 
       {/* ---- Owned resources ---- */}
@@ -188,13 +254,21 @@ export function LevelCalculator({ config }: { config: LevelConfig }) {
           <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={budget.coins} />
           {Object.values(totals.mats).map((r) => {
             const disp = displayLabel(r.id, r.label, char)
+            const f = fill[r.id]
             return (
               <CostRow
                 key={r.id}
                 label={disp}
                 amount={r.qty}
                 iconName={disp}
-                have={budget.mats[r.id] ?? 0}
+                have={f ? f.have : budget.mats[r.id] ?? 0}
+                extra={
+                  f && f.used > 0 ? (
+                    <span className="fill-note">
+                      +{f.used} from {f.sub} ({f.cost} used)
+                    </span>
+                  ) : undefined
+                }
               />
             )
           })}

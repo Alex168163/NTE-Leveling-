@@ -22,7 +22,7 @@ export function characterSteps(): Step[] {
   const steps: Step[] = []
   // Base bracket 1->20 needs no ascension.
   const base = leveling[0]
-  steps.push({ to: base.to, levelXP: base.xp, coins: base.coins, reqs: [] })
+  steps.push({ to: base.to, levelXP: base.xp, coins: base.coins, ascCoins: 0, reqs: [] })
   // Each ascension row couples with its matching leveling bracket.
   for (const asc of ascension) {
     const lev = leveling.find((l) => l.from === asc.from && l.to === asc.to)
@@ -37,7 +37,7 @@ export function characterSteps(): Step[] {
         `${asc.worldDrop.color} World Material`,
       ),
     ].filter(Boolean) as Requirement[]
-    steps.push({ to: asc.to, levelXP: lev.xp, coins: lev.coins + asc.coins, reqs })
+    steps.push({ to: asc.to, levelXP: lev.xp, coins: lev.coins + asc.coins, ascCoins: asc.coins, reqs })
   }
   return steps
 }
@@ -46,7 +46,7 @@ export function arcSteps(): Step[] {
   const { leveling, ascension } = game.arcs
   const steps: Step[] = []
   const base = leveling[0]
-  steps.push({ to: base.to, levelXP: base.xp, coins: base.coins, reqs: [] })
+  steps.push({ to: base.to, levelXP: base.xp, coins: base.coins, ascCoins: 0, reqs: [] })
   for (const asc of ascension) {
     const lev = leveling.find((l) => l.from === asc.from && l.to === asc.to)
     if (!lev) continue
@@ -64,7 +64,7 @@ export function arcSteps(): Step[] {
         `${asc.worldDrop.color} World Material`,
       ),
     ].filter(Boolean) as Requirement[]
-    steps.push({ to: asc.to, levelXP: lev.xp, coins: lev.coins + asc.coins, reqs })
+    steps.push({ to: asc.to, levelXP: lev.xp, coins: lev.coins + asc.coins, ascCoins: asc.coins, reqs })
   }
   return steps
 }
@@ -78,19 +78,27 @@ export interface Totals {
 
 // Sum every step in the range (fromLevel, targetLevel]. fromLevel lets an
 // already-levelled character/arc skip the brackets it has finished.
-export function cumulativeCost(steps: Step[], targetLevel: number, fromLevel = 1): Totals {
+// `ascDoneLevel`: if set, the ascension for that level's NEXT bracket
+// (ascDoneLevel -> ascDoneLevel+10) is already paid, so its ascension coins and
+// materials are excluded (leveling XP/coins still counts).
+export function cumulativeCost(
+  steps: Step[],
+  targetLevel: number,
+  fromLevel = 1,
+  ascDoneLevel: number | null = null,
+): Totals {
   const totals: Totals = { xp: 0, coins: 0, mats: {} }
   for (const s of steps) {
     if (s.to <= fromLevel) continue
     if (s.to > targetLevel) break
+    const ascDone = ascDoneLevel != null && s.to === ascDoneLevel + 10
     totals.xp += s.levelXP
-    totals.coins += s.coins
-    for (const r of s.reqs) {
-      const cur = totals.mats[r.id]
-      totals.mats[r.id] = cur
-        ? { ...cur, qty: cur.qty + r.qty }
-        : { ...r }
-    }
+    totals.coins += ascDone ? s.coins - s.ascCoins : s.coins
+    if (!ascDone)
+      for (const r of s.reqs) {
+        const cur = totals.mats[r.id]
+        totals.mats[r.id] = cur ? { ...cur, qty: cur.qty + r.qty } : { ...r }
+      }
   }
   return totals
 }
@@ -107,7 +115,12 @@ export interface ReachResult {
   nextLevel: number | null // the level you couldn't reach (null if maxed)
 }
 
-export function maxReach(steps: Step[], budget: Budget, fromLevel = 1): ReachResult {
+export function maxReach(
+  steps: Step[],
+  budget: Budget,
+  fromLevel = 1,
+  ascDoneLevel: number | null = null,
+): ReachResult {
   let xp = budget.xp
   let coins = budget.coins
   const mats: Record<string, number> = { ...budget.mats }
@@ -115,17 +128,19 @@ export function maxReach(steps: Step[], budget: Budget, fromLevel = 1): ReachRes
 
   for (const s of steps) {
     if (s.to <= fromLevel) continue // already past this bracket
+    const ascDone = ascDoneLevel != null && s.to === ascDoneLevel + 10
+    const needCoins = ascDone ? s.coins - s.ascCoins : s.coins
     const short: string[] = []
     if (xp < s.levelXP) short.push('XP')
-    if (coins < s.coins) short.push('Beetle Coins')
-    for (const r of s.reqs) if ((mats[r.id] ?? 0) < r.qty) short.push(r.label)
+    if (coins < needCoins) short.push('Beetle Coins')
+    if (!ascDone) for (const r of s.reqs) if ((mats[r.id] ?? 0) < r.qty) short.push(r.label)
 
     if (short.length) {
       return { level, blockedBy: short, nextLevel: s.to }
     }
     xp -= s.levelXP
-    coins -= s.coins
-    for (const r of s.reqs) mats[r.id] = (mats[r.id] ?? 0) - r.qty
+    coins -= needCoins
+    if (!ascDone) for (const r of s.reqs) mats[r.id] = (mats[r.id] ?? 0) - r.qty
     level = s.to
   }
   return { level, blockedBy: [], nextLevel: null }

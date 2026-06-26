@@ -3,7 +3,14 @@
 // Beetle Coins, and each character's specific materials — vs what you own.
 import { characterSteps, cumulativeCost, xpFromSources, gameData } from '../lib/calc'
 import { parseInput } from '../lib/format'
-import { roster, getCharacter, effectiveResourceKey } from '../lib/characters'
+import {
+  roster,
+  getCharacter,
+  effectiveResourceKey,
+  parseCharLevel,
+  cLevelKey,
+  materialMeta,
+} from '../lib/characters'
 import { useResources } from '../state/resources'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
@@ -16,10 +23,12 @@ const COLORS = ['Green', 'Blue', 'Purple']
 interface TeamTotals {
   xp: number
   coins: number
-  mats: { name: string; qty: number }[]
+  mats: { key: string; qty: number }[]
 }
 
-function teamTotals(names: string[]): TeamTotals {
+// Total still-needed resources to take every (filled) team member from its
+// current set level to 80. Each character draws from its own specific materials.
+function teamTotals(names: string[], values: Record<string, string>): TeamTotals {
   let xp = 0
   let coins = 0
   const mats: Record<string, number> = {}
@@ -27,16 +36,17 @@ function teamTotals(names: string[]): TeamTotals {
   for (const name of names) {
     const ch = getCharacter(name)
     if (!ch) continue
-    const c = cumulativeCost(STEPS, 80, 1)
+    const from = parseCharLevel(values[cLevelKey(name)]) ?? 1
+    const c = cumulativeCost(STEPS, 80, from)
     xp += c.xp
     coins += c.coins
     for (const req of Object.values(c.mats)) {
-      const specific = effectiveResourceKey(req.id, name) // -> this character's named material
-      if (!(specific in mats)) order.push(specific)
-      mats[specific] = (mats[specific] ?? 0) + req.qty
+      const key = effectiveResourceKey(req.id, name) // this character's named material (or generic)
+      if (!(key in mats)) order.push(key)
+      mats[key] = (mats[key] ?? 0) + req.qty
     }
   }
-  return { xp, coins, mats: order.map((name) => ({ name, qty: mats[name] })) }
+  return { xp, coins, mats: order.map((key) => ({ key, qty: mats[key] })) }
 }
 
 export function MyTeamsTab() {
@@ -74,7 +84,7 @@ export function MyTeamsTab() {
 
       {Array.from({ length: count }, (_, t) => {
         const names = Array.from({ length: SLOTS }, (_, s) => values[`team:${t}:${s}`] ?? '')
-        const totals = teamTotals(names)
+        const totals = teamTotals(names, values)
         const filled = names.filter(Boolean).length
         return (
           <section className="panel team-card" key={t}>
@@ -111,15 +121,18 @@ export function MyTeamsTab() {
               <div className="cost-list">
                 <CostRow label="Character XP" amount={totals.xp} iconName="XP" have={ownedXp} />
                 <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={ownedCoins} />
-                {totals.mats.map((m) => (
-                  <CostRow
-                    key={m.name}
-                    label={m.name}
-                    amount={m.qty}
-                    iconName={m.name}
-                    have={parseInput(values[m.name] ?? '')}
-                  />
-                ))}
+                {totals.mats.map((m) => {
+                  const meta = materialMeta(m.key)
+                  return (
+                    <CostRow
+                      key={m.key}
+                      label={meta.label}
+                      amount={m.qty}
+                      iconName={meta.icon}
+                      have={parseInput(values[m.key] ?? '')}
+                    />
+                  )
+                })}
               </div>
             )}
           </section>

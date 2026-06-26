@@ -85,10 +85,16 @@ export function ResourcesTab() {
       <section className="panel reach">
         <h3>My Resources</h3>
         <p className="reach-note">
-          Fill in everything you own <strong>here, once</strong>. Every specific material has its own
-          box with its own icon. These values are shared across the whole app and stay the same no
-          matter which character is selected. Inputs accept <strong>k</strong> (thousand) and{' '}
-          <strong>m</strong> (million), e.g. <code>26k</code> or <code>1.6m</code>, up to 999m.
+          Your current resources will change all the time from dailies or spending it here and there.
+          I wish I could sync the inventory from the game, but unfortunately it's a live-service game
+          :(. Please make sure to update these resources whenever you are looking into leveling up a
+          new character or a current one, just to see what the cost will be approximately.
+        </p>
+        <p className="reach-note">
+          Every specific material has its own box with its own icon. Values are shared across the
+          whole app and stay the same no matter which character is selected. Inputs accept{' '}
+          <strong>k</strong> (thousand) and <strong>m</strong> (million), e.g. <code>26k</code> or{' '}
+          <code>1.6m</code>, up to 999m.
         </p>
         <p className="reach-note">
           Any material-selection boxes aren't calculated here — either use them and add that material

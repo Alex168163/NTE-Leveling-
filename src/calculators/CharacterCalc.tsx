@@ -7,6 +7,7 @@ export function CharacterCalc() {
       config={{
         id: 'char',
         xpKeyPrefix: 'guide',
+        usesCharacterLevel: true,
         steps: characterSteps(),
         xpSources: gameData.xpSources.character,
         xpLabel: 'Character XP',

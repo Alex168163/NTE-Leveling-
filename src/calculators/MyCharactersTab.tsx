@@ -2,7 +2,14 @@
 // leveling tabs then show that character's specific in-game materials. Choosing
 // "Unreleased / No Character" (the default) uses the generic example materials.
 import { useState } from 'react'
-import { roster, getCharacter, SELECTED_KEY } from '../lib/characters'
+import {
+  roster,
+  getCharacter,
+  SELECTED_KEY,
+  cLevelKey,
+  LEVEL_OPTIONS,
+  parseCharLevel,
+} from '../lib/characters'
 import { IconStack } from '../components/IconStack'
 import { useResources } from '../state/resources'
 
@@ -96,19 +103,39 @@ export function MyCharactersTab() {
             <div className="char-name">Unreleased / No Character</div>
           </button>
 
-          {list.map((c) => (
-            <button
-              key={c.name}
-              className={`char-card${selected === c.name ? ' active' : ''}`}
-              onClick={() => pick(c.name)}
-            >
-              {c.rank && <span className={`char-rank r-${c.rank}`}>{c.rank}</span>}
-              <div className="char-portrait">
-                <IconStack name={c.name} size={88} />
+          {list.map((c) => {
+            const lvlRaw = values[cLevelKey(c.name)] ?? ''
+            const lvl = parseCharLevel(lvlRaw)
+            const badge = lvlRaw === 'none' ? "Don't own" : lvl != null ? `Lv ${lvl}` : 'Set level'
+            return (
+              <div key={c.name} className={`char-card${selected === c.name ? ' active' : ''}`}>
+                {c.rank && <span className={`char-rank r-${c.rank}`}>{c.rank}</span>}
+                <button className="char-pick" onClick={() => pick(c.name)}>
+                  <div className="char-portrait">
+                    <IconStack name={c.name} size={88} />
+                  </div>
+                  <div className="char-name">{c.name}</div>
+                </button>
+                <div className={`char-level-badge${lvlRaw === 'none' ? ' dont-own' : lvl != null ? ' set' : ''}`}>
+                  {badge}
+                </div>
+                <select
+                  className="char-level-select"
+                  value={lvlRaw}
+                  onChange={(e) => set(cLevelKey(c.name), e.target.value)}
+                  title="Set this character's current level"
+                >
+                  <option value="">Set level…</option>
+                  <option value="none">Don't own</option>
+                  {LEVEL_OPTIONS.map((l) => (
+                    <option key={l} value={l}>
+                      Lv {l}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="char-name">{c.name}</div>
-            </button>
-          ))}
+            )
+          })}
         </div>
       </section>
 
