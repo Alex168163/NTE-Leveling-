@@ -1,35 +1,38 @@
-// Ability & Life Skill Leveling. The combat-ability cost is now PER LEVEL
-// (Ability_Changes_Update.md): pick the selected character's current ability
-// level (from My Characters) and slide to a target — capped by ascension — to
-// see the materials (this character's specific ones) and fixed coins to bring
-// all 4 abilities there. Passive skills and life skills stay as trackers.
+// Ability & Life Skill Leveling. Self-contained: pick a character here (or on
+// My Characters), set/confirm its level & ascension inline, then set the current
+// ability level and slide to a target. Costs use the per-LEVEL table
+// (Ability_Changes_Update.md): the character's specific materials × 4 abilities
+// + fixed coins, with Heterogeneous/Expansion fill-in. Passive & life skills
+// stay as manual trackers.
 import { useMemo } from 'react'
 import { gameData } from '../lib/calc'
 import { parseInput, short, comma } from '../lib/format'
 import { IconStack } from '../components/IconStack'
 import { CostRow } from '../components/CostRow'
-import { CharacterBanner } from '../components/CharacterBanner'
 import { Slider } from '../components/Slider'
 import { useResources } from '../state/resources'
 import { resourceKeyForMaterial } from '../lib/resourceKey'
 import {
   SELECTED_KEY,
+  roster,
   getCharacter,
   displayLabel,
   effectiveResourceKey,
   cLevelKey,
   cAbilityKey,
   cAscKey,
+  LEVEL_OPTIONS,
   parseCharLevel,
   charAscension,
+  ascensionForLevel,
+  maxAscensionAt,
   maxAbilityLevel,
   ABILITY_LEVELS,
   CATEGORY_TO_KEY,
 } from '../lib/characters'
 
 const RATE: Record<string, number> = { Green: 1, Blue: 3, Purple: 9 }
-// category -> [substitute pool key | null, tier]
-const CAT_FILL: Record<string, [string | null, string]> = {
+const CAT_FILL: Record<string, [string, string]> = {
   abilityGreen: ['expansionCore', 'Green'],
   abilityBlue: ['expansionCore', 'Blue'],
   abilityPurple: ['expansionCore', 'Purple'],
@@ -37,8 +40,8 @@ const CAT_FILL: Record<string, [string | null, string]> = {
   wdBlue: ['heterogeneousUnit', 'Blue'],
   wdPurple: ['heterogeneousUnit', 'Purple'],
 }
+const ORDER = ['abilityGreen', 'abilityBlue', 'abilityPurple', 'wdGreen', 'wdBlue', 'wdPurple', 'anomalyPilgrimage']
 
-// A small manual tracker row (passives / life skills).
 function TrackRow({
   display,
   needed,
@@ -50,8 +53,7 @@ function TrackRow({
   have: string
   onHave: (v: string) => void
 }) {
-  const owned = parseInput(have)
-  const left = Math.max(0, needed - owned)
+  const left = Math.max(0, needed - parseInput(have))
   return (
     <div className={`track-row${left === 0 ? ' complete' : ''}`}>
       <IconStack name={display} />
@@ -77,23 +79,18 @@ export function AbilitiesTab() {
   const char = values[SELECTED_KEY] ?? ''
   const ch = getCharacter(char)
   const lvl = ch ? parseCharLevel(values[cLevelKey(char)]) : null
-  const owned = !!ch && lvl != null
-  const asc = owned ? charAscension(values[cAscKey(char)], lvl as number) : 0
-  const maxTarget = maxAbilityLevel(asc)
-  const curAbility = owned
-    ? Math.min(maxTarget, Math.max(1, Number(values[cAbilityKey(char)] ?? 1) || 1))
+  const hasLevel = lvl != null
+  const asc = ch && hasLevel ? charAscension(values[cAscKey(char)], lvl) : 0
+  const maxByAsc = ch && hasLevel ? maxAbilityLevel(asc) : 1
+
+  const curAbility = ch
+    ? Math.min(Math.max(1, maxByAsc), Math.max(1, Number(values[cAbilityKey(char)] ?? 1) || 1))
     : 1
-
-  const levels: number[] = []
-  for (let l = curAbility; l <= maxTarget; l++) levels.push(l)
+  const sliderLevels: number[] = []
+  for (let l = curAbility; l <= maxByAsc; l++) sliderLevels.push(l)
   const targetKey = 'ui:abtarget'
-  const target = Math.min(
-    maxTarget,
-    Math.max(curAbility, Number(values[targetKey] ?? maxTarget) || maxTarget),
-  )
-  const setTarget = (l: number) => set(targetKey, String(l))
+  const target = Math.min(maxByAsc, Math.max(curAbility, Number(values[targetKey] ?? maxByAsc) || maxByAsc))
 
-  // Per-category cost (×4 abilities) from curAbility -> target.
   const cost = useMemo(() => {
     const byCat: Record<string, number> = {}
     let coins = 0
@@ -105,90 +102,123 @@ export function AbilitiesTab() {
     return { byCat, coins }
   }, [curAbility, target])
 
-  // Build display rows with have + fill-in substitutes.
   const rows = useMemo(() => {
     let hetero = parseInput(values['heterogeneousUnit'] ?? '')
     let expansion = parseInput(values['expansionCore'] ?? '')
-    // tier order so green is filled before blue/purple
-    const order = ['abilityGreen', 'abilityBlue', 'abilityPurple', 'wdGreen', 'wdBlue', 'wdPurple', 'anomalyPilgrimage']
-    return order
-      .filter((cat) => cost.byCat[cat])
-      .map((cat) => {
-        const need = cost.byCat[cat]
-        const storeKey = effectiveResourceKey(CATEGORY_TO_KEY[cat], char)
-        const label = displayLabel(CATEGORY_TO_KEY[cat], CATEGORY_TO_KEY[cat], char)
-        const realHave = parseInput(values[storeKey] ?? '')
-        let have = realHave
-        let note: string | undefined
-        const f = CAT_FILL[cat]
-        if (f) {
-          const [pool, tier] = f
-          const rate = RATE[tier]
-          const shortfall = Math.max(0, need - realHave)
-          const avail = pool === 'expansionCore' ? expansion : hetero
-          const filled = Math.min(shortfall, Math.floor(avail / rate))
-          if (filled > 0) {
-            if (pool === 'expansionCore') expansion -= filled * rate
-            else hetero -= filled * rate
-            have = realHave + filled
-            note = `+${filled} from ${pool === 'expansionCore' ? 'Expansion Cores' : 'Heterogeneous Units'} (${filled * rate} used)`
-          }
+    return ORDER.filter((cat) => cost.byCat[cat]).map((cat) => {
+      const need = cost.byCat[cat]
+      const storeKey = effectiveResourceKey(CATEGORY_TO_KEY[cat], char)
+      const label = displayLabel(CATEGORY_TO_KEY[cat], CATEGORY_TO_KEY[cat], char)
+      const realHave = parseInput(values[storeKey] ?? '')
+      let have = realHave
+      let note: string | undefined
+      const f = CAT_FILL[cat]
+      if (f) {
+        const [pool, tier] = f
+        const rate = RATE[tier]
+        const shortfall = Math.max(0, need - realHave)
+        const avail = pool === 'expansionCore' ? expansion : hetero
+        const filled = Math.min(shortfall, Math.floor(avail / rate))
+        if (filled > 0) {
+          if (pool === 'expansionCore') expansion -= filled * rate
+          else hetero -= filled * rate
+          have = realHave + filled
+          note = `+${filled} from ${pool === 'expansionCore' ? 'Expansion Cores' : 'Heterogeneous Units'} (${filled * rate} used)`
         }
-        return { cat, label, need, have, note }
-      })
+      }
+      return { cat, label, need, have, note }
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cost, values, char])
 
   const coinsHave = parseInput(values['coins'] ?? '')
-
-  // Passive skills + life skills (manual trackers, per-character names).
   const keyFor = (m: string) => effectiveResourceKey(resourceKeyForMaterial(m), char)
   const passives = [...gameData.abilities.passive1, ...gameData.abilities.passive2]
 
+  const ascOptions: number[] = []
+  if (hasLevel && lvl >= 20)
+    for (let a = ascensionForLevel(lvl); a <= maxAscensionAt(lvl); a++) ascOptions.push(a)
+
   return (
     <div className="calc">
-      <CharacterBanner />
+      {/* ---- character + level + ascension (editable here too) ---- */}
+      <section className="panel inputs">
+        <h3>Whose abilities?</h3>
+        <div className="ability-current">
+          <span>Character:</span>
+          <select value={char} onChange={(e) => set(SELECTED_KEY, e.target.value)}>
+            <option value="">— select a character —</option>
+            {roster.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.name} ({c.rank})
+              </option>
+            ))}
+          </select>
+          {ch && (
+            <>
+              <span>Level:</span>
+              <select value={values[cLevelKey(char)] ?? ''} onChange={(e) => set(cLevelKey(char), e.target.value)}>
+                <option value="">— set —</option>
+                {LEVEL_OPTIONS.map((l) => (
+                  <option key={l} value={l}>
+                    Lv {l}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+          {ch && hasLevel && lvl >= 20 && ascOptions.length > 1 && (
+            <>
+              <span>Ascension:</span>
+              <select value={String(asc)} onChange={(e) => set(cAscKey(char), e.target.value)}>
+                {ascOptions.map((a) => (
+                  <option key={a} value={a}>
+                    Asc {a}
+                    {a > ascensionForLevel(lvl) ? ' (one ahead)' : ''}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+        {!ch && <p className="reach-note">Pick a character to calculate ability-upgrade costs.</p>}
+        {ch && !hasLevel && (
+          <p className="reach-note">Set {ch.name}'s level above (ability levels are capped by ascension).</p>
+        )}
+      </section>
 
-      {!owned ? (
-        <section className="panel reach">
-          <h3>Ability upgrades</h3>
-          <p className="reach-note">
-            Select a character <strong>and set its level</strong> on the <strong>My Characters</strong>{' '}
-            tab to calculate ability-upgrade costs. Ability levels are capped by ascension, so set the
-            character's level and ascension first.
-          </p>
-        </section>
-      ) : (
+      {/* ---- ability upgrade slider + cost ---- */}
+      {ch && hasLevel && (
         <section className="panel target">
           <div className="target-head">
             <h3>Upgrade all 4 abilities</h3>
-            <div className="target-badge">Lv {target}</div>
+            {maxByAsc > 1 && <div className="target-badge">Lv {target}</div>}
           </div>
           <div className="ability-current">
-            <span>My current ability level:</span>
-            <select
-              value={String(curAbility)}
-              onChange={(e) => set(cAbilityKey(char), e.target.value)}
-              title="Set once here — editable anytime"
-            >
-              {Array.from({ length: maxTarget }, (_, i) => i + 1).map((a) => (
+            <span>Current ability level:</span>
+            <select value={String(curAbility)} onChange={(e) => set(cAbilityKey(char), e.target.value)}>
+              {Array.from({ length: Math.max(1, maxByAsc) }, (_, i) => i + 1).map((a) => (
                 <option key={a} value={a}>
                   Lv {a}
                 </option>
               ))}
             </select>
-            <span className="muted">
-              capped at Lv {maxTarget} by Ascension {asc}
-            </span>
+            <span className="muted">max Lv {maxByAsc} at Ascension {asc}</span>
           </div>
-          {maxTarget <= curAbility ? (
+
+          {maxByAsc <= 1 ? (
             <p className="reach-note">
-              Abilities are already at the max for Ascension {asc} (Lv {maxTarget}). Raise the
-              character's ascension on My Characters to unlock higher ability levels.
+              No ability upgrades available yet — Lv 2 needs Ascension 2 (character Lv 40+). Raise{' '}
+              {ch.name}'s level/ascension above.
+            </p>
+          ) : curAbility >= maxByAsc ? (
+            <p className="reach-note good">
+              Abilities are at the cap for Ascension {asc} (Lv {maxByAsc}). Raise ascension to unlock
+              more.
             </p>
           ) : (
             <>
-              <Slider levels={levels} value={target} onChange={setTarget} />
+              <Slider levels={sliderLevels} value={target} onChange={(l) => set(targetKey, String(l))} />
               <div className="cost-list">
                 <CostRow label="Beetle Coins" amount={cost.coins} iconName="Beetle Coins" have={coinsHave} />
                 {rows.map((r) => (
@@ -203,8 +233,8 @@ export function AbilitiesTab() {
                 ))}
               </div>
               <p className="footnote">
-                Costs are per ability level × 4 abilities. Beetle Coins are the same for every
-                character; materials are {ch?.name}'s specific ones.
+                Per ability level × 4 abilities. Beetle Coins are the same for every character;
+                materials are {ch.name}'s specific ones.
               </p>
             </>
           )}
