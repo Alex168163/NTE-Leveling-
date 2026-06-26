@@ -21,11 +21,32 @@ import {
 import { useResources } from '../state/resources'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
+import { XpEquivalent } from '../components/XpEquivalent'
 
 const MAX_TEAMS = 10
 const SLOTS = 4
 const STEPS = characterSteps()
 const COLORS = ['Green', 'Blue', 'Purple']
+
+// Fill-in substitutes by category: pool + tier (Green 1:1, Blue 3:1, Purple 9:1).
+const RATE: Record<string, number> = { Green: 1, Blue: 3, Purple: 9 }
+const CAT_FILL: Record<string, ['hetero' | 'expansion', string]> = {
+  wdGreen: ['hetero', 'Green'],
+  wdBlue: ['hetero', 'Blue'],
+  wdPurple: ['hetero', 'Purple'],
+  abilityGreen: ['expansion', 'Green'],
+  abilityBlue: ['expansion', 'Blue'],
+  abilityPurple: ['expansion', 'Purple'],
+}
+// Category of a material key (specific name or generic key).
+function categoryOf(key: string): string | null {
+  const nc = gameData.nameToCategory[key]
+  if (nc) return nc
+  if (key.startsWith('wd:')) return 'wd' + key.slice(3)
+  if (key.startsWith('ability:')) return 'ability' + key.slice(8)
+  return null
+}
+const TIER_ORDER: Record<string, number> = { Green: 0, Blue: 1, Purple: 2 }
 
 interface TeamTotals {
   xp: number
@@ -162,20 +183,62 @@ export function MyTeamsTab() {
               <p className="reach-note">Pick characters above to see the team's totals.</p>
             ) : (
               <div className="cost-list">
-                <CostRow label="Character XP" amount={totals.xp} iconName="XP" have={ownedXp} />
+                <CostRow
+                  label="Character XP"
+                  amount={totals.xp}
+                  iconName="XP"
+                  have={ownedXp}
+                  extra={<XpEquivalent xp={totals.xp} sources={gameData.xpSources.character} />}
+                />
                 <CostRow label="Beetle Coins" amount={totals.coins} iconName="Beetle Coins" have={ownedCoins} />
-                {totals.mats.map((m) => {
-                  const meta = materialMeta(m.key)
-                  return (
-                    <CostRow
-                      key={m.key}
-                      label={meta.label}
-                      amount={m.qty}
-                      iconName={meta.icon}
-                      have={parseInput(values[m.key] ?? '')}
-                    />
-                  )
-                })}
+                {(() => {
+                  // Apply Heterogeneous Unit / Expansion Core fill-in across this
+                  // team's shortfalls (green first), then render each material.
+                  let hetero = parseInput(values['heterogeneousUnit'] ?? '')
+                  let expansion = parseInput(values['expansionCore'] ?? '')
+                  const filledHave: Record<string, { have: number; note?: string }> = {}
+                  const sorted = [...totals.mats].sort((a, b) => {
+                    const ta = CAT_FILL[categoryOf(a.key) ?? '']?.[1]
+                    const tb = CAT_FILL[categoryOf(b.key) ?? '']?.[1]
+                    return (TIER_ORDER[ta] ?? 9) - (TIER_ORDER[tb] ?? 9)
+                  })
+                  for (const m of sorted) {
+                    const realHave = parseInput(values[m.key] ?? '')
+                    const f = CAT_FILL[categoryOf(m.key) ?? '']
+                    if (!f) {
+                      filledHave[m.key] = { have: realHave }
+                      continue
+                    }
+                    const [pool, tier] = f
+                    const rate = RATE[tier]
+                    const shortfall = Math.max(0, m.qty - realHave)
+                    const avail = pool === 'expansion' ? expansion : hetero
+                    const used = Math.min(shortfall, Math.floor(avail / rate)) * rate
+                    const got = used / rate
+                    if (got > 0) {
+                      if (pool === 'expansion') expansion -= used
+                      else hetero -= used
+                      filledHave[m.key] = {
+                        have: realHave + got,
+                        note: `+${got} from ${pool === 'expansion' ? 'Expansion Cores' : 'Heterogeneous Units'} (${used} used)`,
+                      }
+                    } else filledHave[m.key] = { have: realHave }
+                  }
+                  return totals.mats.map((m) => {
+                    const meta = materialMeta(m.key)
+                    const fh = filledHave[m.key]
+                    return (
+                      <CostRow
+                        key={m.key}
+                        label={meta.label}
+                        amount={m.qty}
+                        iconName={meta.icon}
+                        have={fh?.have ?? parseInput(values[m.key] ?? '')}
+                        extra={fh?.note ? <span className="fill-note">{fh.note}</span> : undefined}
+                      />
+                    )
+                  })
+                })()}
               </div>
             )}
           </section>
