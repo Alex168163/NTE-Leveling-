@@ -10,9 +10,12 @@ import {
   parseCharLevel,
   cLevelKey,
   cAscKey,
+  cAbilityKey,
   charAscension,
   ascensionForLevel,
   materialMeta,
+  ABILITY_LEVELS,
+  CATEGORY_TO_KEY,
 } from '../lib/characters'
 
 import { useResources } from '../state/resources'
@@ -51,6 +54,20 @@ function teamTotals(names: string[], values: Record<string, string>): TeamTotals
       if (!(key in mats)) order.push(key)
       mats[key] = (mats[key] ?? 0) + req.qty
     }
+
+    // Ability upgrades: from the character's current ability level up to Lv 10
+    // (a fully built character is Ascension 6 at Lv 80, so abilities cap at 10),
+    // × 4 abilities. This adds Anomaly Pilgrimage + ability/world materials.
+    const curAbility = Math.max(1, Number(values[cAbilityKey(name)] ?? 1) || 1)
+    for (const row of ABILITY_LEVELS) {
+      if (row.level <= curAbility) continue
+      coins += row.coins * 4
+      for (const m of row.mats) {
+        const key = effectiveResourceKey(CATEGORY_TO_KEY[m.cat], name)
+        if (!(key in mats)) order.push(key)
+        mats[key] = (mats[key] ?? 0) + m.qty * 4
+      }
+    }
   }
   return { xp, coins, mats: order.map((key) => ({ key, qty: mats[key] })) }
 }
@@ -82,7 +99,8 @@ export function MyTeamsTab() {
         <h3>My Teams</h3>
         <p className="reach-note">
           Build up to {MAX_TEAMS} teams of 4 characters. Each team shows the total resources still
-          needed to fully level all four characters to <strong>Lv 80</strong>, compared against what
+          needed to fully build all four characters — <strong>leveling to Lv 80</strong> (with
+          ascensions) <strong>plus maxing all 4 abilities to Lv 10</strong> — compared against what
           you own (filled in on <strong>My Resources</strong>). Each character draws from its own
           specific materials.
         </p>
