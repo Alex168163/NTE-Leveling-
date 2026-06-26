@@ -520,13 +520,27 @@ input,
   width: 100%;
 }
 .char-stars {
-  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 206, 77, 0.4);
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 3px;
+}
+.char-stars .on {
   color: var(--amber);
-  font-size: 10px;
-  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255, 206, 77, 0.85);
+}
+.char-stars .off {
+  color: rgba(255, 255, 255, 0.22);
 }
 .char-banner .char-stars {
-  font-size: 14px;
+  font-size: 20px;
 }
 .char-rank {
   position: absolute;

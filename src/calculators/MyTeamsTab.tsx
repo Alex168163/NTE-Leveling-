@@ -15,7 +15,6 @@ import {
   materialMeta,
 } from '../lib/characters'
 
-const star = (asc: number) => '★'.repeat(asc)
 import { useResources } from '../state/resources'
 import { CostRow } from '../components/CostRow'
 import { IconStack } from '../components/IconStack'
@@ -128,8 +127,11 @@ export function MyTeamsTab() {
                     {name && (
                       <div className="team-slot-info">
                         {lvl != null ? `Lv ${lvl}` : 'no level set'}
-                        {lvl != null && lvl >= 20 && asc > 0 && (
-                          <span className="char-stars"> {star(asc)}</span>
+                        {lvl != null && lvl >= 20 && (
+                          <span className="char-stars" title={`Ascension ${asc}`}>
+                            <span className="on">{'✦'.repeat(asc)}</span>
+                            <span className="off">{'✧'.repeat(6 - asc)}</span>
+                          </span>
                         )}
                       </div>
                     )}

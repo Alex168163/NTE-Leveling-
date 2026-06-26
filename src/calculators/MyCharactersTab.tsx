@@ -15,7 +15,15 @@ import {
   ascensionForLevel,
 } from '../lib/characters'
 
-const stars = (asc: number) => '★'.repeat(asc) + '☆'.repeat(6 - asc)
+// 4-point stars: filled ✦ for the ascension count, hollow ✧ for the rest.
+function Stars({ asc }: { asc: number }) {
+  return (
+    <span className="char-stars" title={`Ascension ${asc}`}>
+      <span className="on">{'✦'.repeat(asc)}</span>
+      <span className="off">{'✧'.repeat(6 - asc)}</span>
+    </span>
+  )
+}
 import { IconStack } from '../components/IconStack'
 import { useResources } from '../state/resources'
 
@@ -134,8 +142,8 @@ export function MyCharactersTab() {
                 </button>
                 <div className={`char-level-badge${lvlRaw === 'none' ? ' dont-own' : owned ? ' set' : ''}`}>
                   {badge}
-                  {owned && lvl >= 20 && <span className="char-stars" title={`Ascension ${asc}`}>{stars(asc)}</span>}
                 </div>
+                {owned && lvl >= 20 && <Stars asc={asc} />}
                 <select
                   className="char-level-select"
                   value={lvlRaw}
